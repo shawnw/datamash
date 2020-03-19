@@ -76,6 +76,10 @@ struct operation_data operations[] =
   {STRING_SCALAR,  IGNORE_FIRST, STRING_RESULT},
   /* OP_MEAN */
   {NUMERIC_SCALAR, IGNORE_FIRST, NUMERIC_RESULT},
+  /* OP_GEOMEAN */
+  {NUMERIC_SCALAR, IGNORE_FIRST, NUMERIC_RESULT},
+  /* OP_HARMMEAN */
+  {NUMERIC_SCALAR, IGNORE_FIRST, NUMERIC_RESULT},
   /* OP_MEDIAN */
   {NUMERIC_VECTOR, IGNORE_FIRST, NUMERIC_RESULT},
   /* OP_QUARTILE_1 */
@@ -395,6 +399,14 @@ field_op_collect (struct fieldop *op,
       op->value += num_value;
       break;
 
+    case OP_GEOMEAN:
+      op->value += logl(num_value);
+      break;
+
+    case OP_HARMMEAN:
+      op->value += 1.0 / num_value;
+      break;
+
     case OP_COUNT:
       op->value++;
       break;
@@ -689,6 +701,8 @@ field_op_summarize_empty (struct fieldop *op)
   switch (op->op)                                /* LCOV_EXCL_BR_LINE */
     {
     case OP_MEAN:
+    case OP_GEOMEAN:
+    case OP_HARMMEAN:
     case OP_S_SKEWNESS:
     case OP_P_SKEWNESS:
     case OP_S_EXCESS_KURTOSIS:
@@ -799,6 +813,14 @@ field_op_summarize (struct fieldop *op)
     {
     case OP_MEAN:
       numeric_result = op->value / op->count;
+      break;
+
+    case OP_GEOMEAN:
+      numeric_result = expl(op->value / op->count);
+      break;
+
+    case OP_HARMMEAN:
+      numeric_result = op->count / op->value;
       break;
 
     case OP_SUM:
