@@ -108,6 +108,7 @@ enum
   REMOVE_NA_VALUES_OPTION,
   OUTPUT_DELIMITER_OPTION,
   CUSTOM_FORMAT_OPTION,
+  COLLAPSE_SEP_OPTION,
   UNDOC_PRINT_INF_OPTION,
   UNDOC_PRINT_NAN_OPTION,
   UNDOC_PRINT_PROGNAME_OPTION,
@@ -131,6 +132,7 @@ static struct option const long_options[] =
   {"filler", required_argument, NULL, 'F'},
   {"format", required_argument, NULL, CUSTOM_FORMAT_OPTION},
   {"output-delimiter", required_argument, NULL, OUTPUT_DELIMITER_OPTION},
+  {"collapse-delimiter", required_argument, NULL, COLLAPSE_SEP_OPTION},
   {"sort", no_argument, NULL, 's'},
   {"no-strict", no_argument, NULL, NO_STRICT_OPTION},
   {"narm", no_argument, NULL, REMOVE_NA_VALUES_OPTION},
@@ -266,6 +268,10 @@ which require a pair of fields (e.g. 'pcov 2:6').\n"), stdout);
       fputs (_("\
       --output-delimiter=X  use X instead as output field delimiter\n\
                             (default: use same delimiter as -t/-W)\n\
+"), stdout);
+      fputs (_("\
+      --collapse-delimiter=X  use X to separate elements in collapse and\n\
+                              unique lists (default: comma)\n\
 "), stdout);
       fputs (_("\
       --narm                skip NA/NaN values\n\
@@ -1232,6 +1238,13 @@ int main (int argc, char* argv[])
         case 'W':
           in_tab = TAB_WHITESPACE;
           out_tab = '\t';
+          break;
+
+        case COLLAPSE_SEP_OPTION:
+          if (optarg[0] == '\0' || optarg[1] != '\0')
+            die (EXIT_FAILURE, 0,
+                 _("the delimiter must be a single character"));
+          collapse_separator = optarg[0];
           break;
 
         case UNDOC_PRINT_INF_OPTION:
