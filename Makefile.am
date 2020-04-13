@@ -42,7 +42,9 @@ datamash_SOURCES = src/system.h \
 	       src/double-format.c src/double-format.h \
 	       src/datamash.c
 
-datamash_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS) $(MINGW_CFLAGS)
+datamash_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS) $(MINGW_CFLAGS) \
+	$(OPENMP_CFLAGS)
+
 datamash_LDADD = \
        lib/lib$(PACKAGE).a \
        $(CEIL_LIBM) \

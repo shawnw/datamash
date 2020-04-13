@@ -56,8 +56,22 @@ gl_WARN_ADD([-Wmissing-format-attribute])
 gl_WARN_ADD([-Wstrict-overflow])
 gl_WARN_ADD([-Wsuggest-attribute=const])
 gl_WARN_ADD([-Wsuggest-attribute=pure])
+gl_WARN_ADD([-Wno-unknown-pragmas])
 AC_SUBST([WARN_CFLAGS])
 
+# Check for OpenMP support if requested.
+AC_ARG_ENABLE([openmp],
+        [AS_HELP_STRING([--enable-openmp],[enable OpenMP])],
+        [case $enableval in
+                 yes|no) ;;
+                 *)   AC_MSG_ERROR([bad value $enableval for openmp option]) ;;
+               esac
+               use_openmp=$enableval],
+        [use_openmp=no]
+        )
+if test "$use_openmp" = yes ; then
+   AC_OPENMP()
+fi
 
 # Enable lint checks, for coverage/static-analyzers.
 AC_ARG_ENABLE([lint],
