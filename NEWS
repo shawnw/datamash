@@ -9,6 +9,9 @@
 
   New operations: geomean (Geometric mean) and harmmean (Harmonic mean).
 
+** Bug Fixes
+
+  The `-s` and `-z` options did not work together.
 
 * Noteworthy changes in release 1.6 (2020-02-24) [stable]
 
