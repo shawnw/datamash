@@ -96,6 +96,7 @@ mad_value (const long double * const values, size_t n, double scale)
   const long double median = median_value (values,n);
   long double *mads = xnmalloc (n,sizeof (long double));
   long double mad = 0 ;
+#pragma omp parallel for simd
   for (size_t i=0; i<n; ++i)
     mads[i] = fabsl (median - values[i]);
   qsortfl (mads,n);
@@ -109,6 +110,7 @@ arithmetic_mean_value (const long double * const values, const size_t n)
 {
   long double sum=0;
   long double mean;
+#pragma omp parallel for simd reduction(+: sum)
   for (size_t i = 0; i < n; i++)
     sum += values[i];
   mean = sum / n ;
@@ -128,7 +130,7 @@ variance_value (const long double * const values, size_t n, int df)
 
   mean = arithmetic_mean_value (values, n);
 
-  sum = 0 ;
+#pragma omp parallel for simd reduction(+: sum)
   for (size_t i = 0; i < n; i++)
     sum += (values[i] - mean) * (values[i] - mean);
 
@@ -152,7 +154,7 @@ covariance_value ( const long double * const valuesA,
   meanA = arithmetic_mean_value (valuesA, n);
   meanB = arithmetic_mean_value (valuesB, n);
 
-  sum = 0 ;
+#pragma omp parallel for simd reduction(+: sum)
   for (size_t i = 0; i < n; i++)
     sum += (valuesA[i] - meanA) * (valuesB[i] - meanB);
 
@@ -177,6 +179,7 @@ pearson_corr_value ( const long double * const valuesA,
   meanA = arithmetic_mean_value (valuesA, n);
   meanB = arithmetic_mean_value (valuesB, n);
 
+#pragma omp parallel for simd reduction(+: sumA, sumB, sumCo)
   for (size_t i = 0; i < n; i++)
     {
       const long double a = (valuesA[i] - meanA);
@@ -218,6 +221,7 @@ skewness_value (const long double * const values, size_t n, int df)
 
   mean = arithmetic_mean_value (values, n);
 
+#pragma omp parallel for simd reduction(+: moment2, moment3)
   for (size_t i = 0; i < n; i++)
     {
       const long double t = (values[i] - mean);
@@ -278,6 +282,7 @@ excess_kurtosis_value (const long double * const values, size_t n, int df)
 
   mean = arithmetic_mean_value (values, n);
 
+#pragma omp parallel for simd reduction(+: moment2, moment4)
   for (size_t i = 0; i < n; i++)
     {
       const long double t = (values[i] - mean);
@@ -421,6 +426,7 @@ trimmed_mean_value ( const long double * const values, size_t n,
   size_t c = pos_zero (floorl (trimmed_mean_percent * n));
 
   long double v = 0;
+#pragma omp parallel for simd reduction(+: v)
   for (size_t i=c; i< (n-c); i++)
     v += values[i];
 
