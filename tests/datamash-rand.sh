@@ -31,7 +31,17 @@ fail=0
 require_paste_
 
 ## Ensure seq is useable
-## (not installed on OpenBSD by default)
+## Wrap jot on OpenBSD since it doesn't have seq
+if [ $(uname -s) = OpenBSD ]; then
+    seq() {
+	if [ $# -eq 1 ]; then
+	    jot "$1"
+	elif [ $# -eq 2 ]; then
+	    jot - "$1" "$2"
+	fi
+    }
+fi
+
 seq 10 >/dev/null 2>/dev/null ||
     skip_ "requires a working seq"
 
