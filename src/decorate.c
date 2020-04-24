@@ -806,6 +806,11 @@ main (int argc, char **argv)
   bool decorate_only = false;
   bool print_sort_args = false;
 
+#ifdef HAVE_PLEDGE
+  /* On OpenBSD, use pledge(2) to limit privileges */
+  pledge ("stdio proc exec rpath", NULL);
+#endif
+
   set_program_name (argv[0]);
   setlocale (LC_ALL, "");
   bindtextdomain (PACKAGE, LOCALEDIR);

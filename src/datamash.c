@@ -1138,6 +1138,11 @@ int main (int argc, char* argv[])
   DECL_LONG_DOUBLE_ROUNDING
   BEGIN_LONG_DOUBLE_ROUNDING ();
 
+#ifdef HAVE_PLEDGE
+  /* On OpenBSD, use pledge(2) to limit privileges */
+  pledge ("stdio proc exec rpath", NULL);
+#endif
+
   set_program_name (argv[0]);
 
 #ifdef FORCE_C_LOCALE
