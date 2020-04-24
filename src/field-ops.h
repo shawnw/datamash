@@ -169,6 +169,11 @@ extern int field_op_output_precision;
 void
 init_random (void);
 
+/* Generate a random number uniformly distributed from [0,x).
+   x should be less than RAND_MAX. */
+unsigned long
+gen_random_ul (unsigned long);
+
 /* Helper function to print to stdout the 'empty value' of a numeric
    operation (e.g. what's printed by 'OP_MEAN' with empty input).
    Used in some of the tests. */

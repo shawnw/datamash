@@ -110,6 +110,12 @@ fi
 ## Look for OpenBSD pledge(2)
 AC_CHECK_FUNCS([pledge])
 
+## Test for random number related functions that aren't in gnulib
+## getentropy(3) on OpenBSD and Linux for seeding RNG
+## arc4random_uniform() for generating random numbers on BSDs and others
+## with libbsd
+AC_CHECK_FUNCS([getentropy arc4random_buf arc4random_uniform])
+
 ## Check for bash-completion using pkg-config
 ##   ./configure --with-bash-completion-dir=[no|local|global|PATH] .
 ## See README for details.
