@@ -432,6 +432,10 @@ my @Tests =
             "line 1 has only 3 fields\n"}],
   ['e25',  '-g 1,,2 sum 1' ,  {IN_PIPE=>"a\n"}, {EXIT=>1},
       {ERR=>"$prog: missing field for operation 'groupby'\n"}],
+  ['e26',  '-g 4-1 sum 1', {IN_PIPE=>"a\n"}, {EXIT=>1},
+      {ERR=>"$prog: invalid field range for operation 'groupby'\n"}],
+  ['e27',  '-g 1- sum 1', {IN_PIPE=>"a\n"}, {EXIT=>1},
+      {ERR=>"$prog: invalid field range for operation 'groupby'\n"}],
 
   # No newline at the end of the lines
   ['nl1', 'sum 1', {IN_PIPE=>"99"}, {OUT=>"99\n"}],

@@ -1,5 +1,9 @@
 * Noteworthy changes in release ?.? (?-?-?) []
 
+** New Features
+
+  -g and groupby take ranges of columns (e.g. 1-4)
+
 ** Bug Fixes
 
   Datamash now passes the -z/--zero-terminated flag to the sort(1) child
