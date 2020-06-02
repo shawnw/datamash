@@ -2,10 +2,11 @@
 
 ** New Features
 
-  Updated bash completition script
+  Updated bash completion script
 
   New option --collapse-delimiter to use with collapse and unique.
 
+  -g and groupby take ranges of columns (e.g. 1-4)
 
 ** Bug Fixes
 
