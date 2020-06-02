@@ -1,5 +1,9 @@
 * Noteworthy changes in release ?.? (?-?-?) []
 
+** New Features
+
+  Updated bash completition script
+
 ** Bug Fixes
 
   Datamash now passes the -z/--zero-terminated flag to the sort(1) child
