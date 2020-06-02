@@ -4,6 +4,8 @@
 
   Updated bash completition script
 
+  New option --collapse-delimiter to use with collapse and unique.
+
 ** Bug Fixes
 
   Datamash now passes the -z/--zero-terminated flag to the sort(1) child
