@@ -121,6 +121,8 @@ AC_DEFINE([HAVE_BROKEN_STRTOLD],[1],
           [Define to 1 if strtold does not work properly (e.g. in cygwin)])
 fi
 
+## Look for OpenBSD pledge(2)
+AC_CHECK_FUNCS([pledge])
 
 ## Check for bash-completion using pkg-config
 ##   ./configure --with-bash-completion-dir=[no|local|global|PATH] .
@@ -154,6 +156,15 @@ AM_CONDITIONAL([ENABLE_BASH_COMPLETION],
 if sort -s < /dev/null > /dev/null 2>/dev/null ; then
   AC_DEFINE([HAVE_STABLE_SORT],[1],
             [Define to 1 if sort on this system supports -s for stable sorting])
+fi
+
+##
+## Check if the system's sort supports "-z" for NUL line delimiters
+##
+if sort -z < /dev/null > /dev/null 2>/dev/null ; then
+  AC_DEFINE([HAVE_ZERO_SORT],[1],
+            [Define to 1 if sort on this system supports -z
+             for NUL line delimiters])
 fi
 
 ## Are we building from git checked-out sources?
