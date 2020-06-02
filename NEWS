@@ -6,6 +6,7 @@
 
   New option --collapse-delimiter to use with collapse and unique.
 
+
 ** Bug Fixes
 
   Datamash now passes the -z/--zero-terminated flag to the sort(1) child
@@ -13,6 +14,8 @@
   if the system's sort(1) does not support -z, datamash reports the error
   and exits. Previously it would omit the "-z" when running sort(1),
   resulting in incorrect results.
+
+  Remove modulo bias in rand; general improvements to RNG and seeding.
 
 
 * Noteworthy changes in release 1.7 (2020-04-23) [testing]

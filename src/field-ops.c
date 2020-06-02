@@ -32,6 +32,10 @@
 #include <stdbool.h>
 #include <time.h>
 #include <libgen.h> /* for dirname & POSIX version of basename */
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "die.h"
 #include "minmax.h"
@@ -511,7 +515,7 @@ field_op_collect (struct fieldop *op,
       {
         /* Reservoir sampling,
            With a simpler case were "k=1" */
-        unsigned long i = random ()%op->count;
+        unsigned long i = gen_random_ul (op->count);
         if (op->first || i==0)
           {
             field_op_replace_string (op, str, slen);
@@ -1163,9 +1167,68 @@ mix (unsigned long a, unsigned long b, unsigned long c)
 void
 init_random (void)
 {
-  unsigned long seed = mix (clock (), time (NULL), getpid ());
+  unsigned int seed;
+
+#ifdef HAVE_GETENTROPY
+  /* Use getentropy() to generate a seed if available */
+  if (getentropy (&seed, sizeof seed) == 0)
+    goto seeded;
+#endif
+
+#ifdef HAVE_ARC4RANDOM_BUF
+  /* Use arc4random_buf() to generate a seed if available */
+  arc4random_buf (&seed, sizeof seed);
+  goto seeded;
+#endif
+
+  /* Try to read seed from /dev/urandom */
+  int fd = open ("/dev/urandom", O_RDONLY);
+  if (fd >= 0) {
+    ssize_t r = read (fd, &seed, sizeof seed);
+    close (fd);
+    if (r == sizeof seed)
+      goto seeded;
+  }
+
+  /* If none of the above work, fall back on a time/pid based seed */
+  seed = mix (clock (), time (NULL), getpid ());
+
+ seeded:
   srandom (seed);
 }
+
+unsigned long
+gen_random_ul (unsigned long upper)
+{
+#ifdef HAVE_ARC4RANDOM_UNIFORM
+  /* If available, prefer arc4random RNG */
+  if (upper <= UINT32_MAX)
+    return arc4random_uniform (upper);
+#endif
+
+  /* NetBSD (And possibly others?) define RANDOM_MAX as the largest
+     number returned by random(), others use RAND_MAX.
+  */
+#ifdef RANDOM_MAX
+#define MYRAND_MAX RANDOM_MAX
+#else
+#define MYRAND_MAX RAND_MAX
+#endif
+
+  if (upper > MYRAND_MAX)
+    die (EXIT_FAILURE, 0, _("random number upper range %lu is too high"),
+         upper);
+
+  unsigned long copies = MYRAND_MAX / upper;
+  unsigned long limit = upper * copies;
+  unsigned long myrand;
+  do {
+    myrand = random ();
+  } while (myrand >= limit);
+
+  return myrand / copies;
+}
+
 
 const char*
 field_op_collect_result_name (const enum FIELD_OP_COLLECT_RESULT flocr)
