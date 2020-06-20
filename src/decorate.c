@@ -748,7 +748,8 @@ adjust_key_fields ()
 char**
 build_sort_process_args ()
 {
-  int argc = 2 ; /* one 'sort' program name (argv[0]), one for NULL */
+  int argc = 3 ; /* one 'sort' program name (argv[0]), one extra arg on NetBSD,
+		    one for NULL */
   struct keyfield *key = keylist;
 
   /* step 1: count number of args */
@@ -764,6 +765,16 @@ build_sort_process_args ()
   int i = 0;
 
   argv[i++] = xstrdup (sort_cmd); /* argv[0] */
+
+#ifdef __NetBSD__
+  /* NetBSD's /usr/bin/sort is stable by default, unlike every other
+   * one I checked, causing test case failures. So make it unstable.
+   */
+  if (STREQ (sort_cmd, "/usr/bin/sort"))
+    {
+      argv[i++] = "-S";
+    }
+#endif
 
   key = keylist;
   do {
