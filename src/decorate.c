@@ -91,7 +91,8 @@ enum
   NMERGE_OPTION,
   RANDOM_SOURCE_OPTION,
   HEADER_OPTION,
-  PARALLEL_OPTION
+  PARALLEL_OPTION,
+  SORT_PROGRAM_OPTION
 };
 
 static struct option const longopts[] =
@@ -103,6 +104,7 @@ static struct option const longopts[] =
   {"zero-terminated", no_argument, NULL, 'z'},
   {"print-sort-args", no_argument, NULL, PRINT_SORT_ARGS_OPTION},
   {"header", required_argument, NULL, HEADER_OPTION},
+  {"sort-cmd", required_argument, NULL, SORT_PROGRAM_OPTION},
 
   /* sort options, passed as-is to the sort process */
   {"check", optional_argument, NULL, CHECK_OPTION},
@@ -206,6 +208,9 @@ General Options:\n\
 "), stdout);
       fputs (_("\
   -z, --zero-terminated      line delimiter is NUL, not newline\n\
+"), stdout);
+      fputs (_("\
+  --sort-cmd=/path/to/sort   Alternative sort(1) to use.\n\
 "), stdout);
      fputs (HELP_OPTION_DESCRIPTION, stdout);
      fputs (VERSION_OPTION_DESCRIPTION, stdout);
@@ -888,6 +893,10 @@ main (int argc, char **argv)
           add_sort_extra_args ("--compress-program");
           add_sort_extra_args (optarg);
           break;
+
+	case SORT_PROGRAM_OPTION:
+	  sort_cmd = xstrdup (optarg);
+	  break;
 
         case RANDOM_SOURCE_OPTION:
           add_sort_extra_args ("--random-source");

@@ -111,6 +111,7 @@ enum
   REMOVE_NA_VALUES_OPTION,
   OUTPUT_DELIMITER_OPTION,
   CUSTOM_FORMAT_OPTION,
+  SORT_PROGRAM_OPTION,
   UNDOC_PRINT_INF_OPTION,
   UNDOC_PRINT_NAN_OPTION,
   UNDOC_PRINT_PROGNAME_OPTION,
@@ -138,6 +139,7 @@ static struct option const long_options[] =
   {"no-strict", no_argument, NULL, NO_STRICT_OPTION},
   {"narm", no_argument, NULL, REMOVE_NA_VALUES_OPTION},
   {"round", required_argument, NULL, 'R'},
+  {"sort-cmd", required_argument, NULL, SORT_PROGRAM_OPTION},
   {GETOPT_HELP_OPTION_DECL},
   {GETOPT_VERSION_OPTION_DECL},
   /* Undocumented options */
@@ -283,6 +285,9 @@ which require a pair of fields (e.g. 'pcov 2:6').\n"), stdout);
 "), stdout);
       fputs (_("\
   -z, --zero-terminated     end lines with 0 byte, not newline\n\
+"), stdout);
+      fputs (_("\
+  --sort-cmd=/path/to/sort   Alternative sort(1) to use.\n\
 "), stdout);
 
       fputs (HELP_OPTION_DESCRIPTION, stdout);
@@ -1269,6 +1274,10 @@ int main (int argc, char* argv[])
           in_tab = TAB_WHITESPACE;
           out_tab = '\t';
           break;
+
+	case SORT_PROGRAM_OPTION:
+	  sort_cmd = xstrdup (optarg);
+	  break;
 
         case UNDOC_PRINT_INF_OPTION:
         case UNDOC_PRINT_NAN_OPTION:

@@ -109,12 +109,11 @@ compare_ err1 exp_err1 ||
   { warn_ "group-too-long error message is incorrect" ; fail=1 ; }
 
 ##
-## Test with non-existing 'sort' executable,
-## by removing all directories fromt he PATH
+## Test with non-existing 'sort' executable, by giving an invalid path
 ##
 ## NOTE: This run SHOULD return an error, hence the "&&" instead of "||"
 ##
-seq 10 | PATH=$DATAMASHDIR datamash --sort -g 1 sum 1 &&
+seq 10 | datamash --sort --sort-cmd=/not/a/sort -g 1 sum 1 &&
   { warn_ "datamash --sort with non existing 'sort' did not fail " \
           "(it should have failed)" ; fail=1 ; }
 
@@ -122,7 +121,7 @@ seq 10 | PATH=$DATAMASHDIR datamash --sort -g 1 sum 1 &&
 ## Test with a 'sort' that crashes
 ## NOTE: This run SHOULD return an error, hence the "&&" instead of "||"
 ##
-seq 10 | PATH=$BADDIR:$DATAMASHDIR datamash --sort -g 1 sum 1 &&
+seq 10 | datamash --sort --sort-cmd="${BADDIR}/sort" -g 1 sum 1 &&
   { warn_ "datamash --sort with crashing 'sort' did not fail " \
           "(it should have failed)" ; fail=1 ; }
 
