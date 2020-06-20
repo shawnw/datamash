@@ -100,6 +100,9 @@ static size_t rmdup_initial_size = (1024*1024);
 /* Explicit output delimiter with --output-delimiter */
 static int explicit_output_delimiter = -1;
 
+/* Path to default sort program */
+static const char *sort_cmd = SORT_PATH;
+
 enum
 {
   INPUT_HEADER_OPTION = CHAR_MAX + 1,
@@ -1066,40 +1069,59 @@ open_input ()
              the 'sort' child-process */
           process_input_header (stdin);
         }
-#ifdef SORT_WITHOUT_LOCALE
-      /* For mingw/windows systems */
-      strcat (cmd,"sort ");
-#else
-      strcat (cmd,"LC_ALL=C sort ");
-#endif
-      if (!case_sensitive)
-        strcat (cmd,"-f ");
+      int len;
+      const char *stable_sort_arg = "", *zero_delim_arg = "",
+	*case_insensitive_arg = "", *delim_arg = "";
 #ifdef HAVE_STABLE_SORT
       /* stable sort (-s) is needed to support first/last operations
          (prevent sort from re-ordering lines which are not part of the group.
          '-s' is not standard POSIX, but very commonly supported, including
          on GNU coreutils, Busybox, FreeBSD, MacOSX */
-      strcat (cmd,"-s ");
+      stable_sort_arg = "-s ";
 #endif
+
       if (eolchar == '\0')
         {
 #ifdef HAVE_ZERO_SORT
           /* sort needs to understand -z to properly sort input using
              NUL as the line delimiter */
-          strcat (cmd,"-z ");
+	  zero_delim_arg = "-z ";
 #else
           die (EXIT_FAILURE, 0,
                  _("-s and -z cannot be combined on this system"));
 #endif
         }
+      if (!case_sensitive)
+	{
+	  case_insensitive_arg = "-f ";
+	}
+
       if (in_tab != TAB_WHITESPACE)
         {
           /* If the delimiter is a single-quote character, use
              double-quote to prevent shell quoting problems. */
           const char qc = (in_tab=='\'')?'"':'\'';
           snprintf (tmp,sizeof (tmp),"-t %c%c%c ",qc,in_tab,qc);
-          strcat (cmd,tmp);
+	  delim_arg = tmp;
         }
+
+#ifdef SORT_WITHOUT_LOCALE
+      /* For mingw/windows systems */
+      len = snprintf (cmd, sizeof (cmd), "%s %s%s%s%s", sort_cmd,
+		      stable_sort_arg, zero_delim_arg,
+		      case_insensitive_arg, delim_arg);
+#else
+      len = snprintf (cmd, sizeof (cmd), "LC_ALL=C %s %s%s%s%s", sort_cmd,
+		      stable_sort_arg, zero_delim_arg,
+		      case_insensitive_arg, delim_arg);
+#endif
+      if (len < 0 || (size_t) len >= sizeof (cmd))
+	{
+	  die (EXIT_FAILURE, 0,
+	       _("sort command too-long (please report this bug)"));
+
+	}
+
       for (size_t i = 0; i < dm->num_grps; ++i)
         {
           const size_t col_num = dm->grps[i].num;

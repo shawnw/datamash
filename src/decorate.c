@@ -40,6 +40,8 @@
 #define AUTHORS \
   proper_name ("Assaf Gordon")
 
+static const char *sort_cmd = SORT_PATH;
+
 static bool debug_print_pid = false;
 
 static void _GL_ATTRIBUTE_FORMAT ((__printf__, 1, 2))
@@ -211,7 +213,8 @@ General Options:\n\
      putchar ('\n');
 
      fputs (_("\
-The following options are passed to sort(1) as-is:\n\
+The following options are passed to sort as-is\
+ (Most of them assume GNU sort):\n\
 "), stdout);
 
      putchar ('\n');
@@ -755,7 +758,7 @@ build_sort_process_args ()
   char** argv = xcalloc (argc, sizeof (char*));
   int i = 0;
 
-  argv[i++] = xstrdup ("sort"); /* argv[0] */
+  argv[i++] = xstrdup (sort_cmd); /* argv[0] */
 
   key = keylist;
   do {
@@ -1123,7 +1126,7 @@ main (int argc, char **argv)
                   ++p;
                 }
             }
-          execvp ("sort", sort_args);
+          execvp (sort_cmd, sort_args);
 
           die (SORT_FAILURE, errno, _("failed to run the sort command"));
         }
