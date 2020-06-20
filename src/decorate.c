@@ -31,6 +31,7 @@
 #define Version VERSION
 #include "version-etc.h"
 #include "ignore-value.h"
+#include "sh-quote.h"
 
 #include "decorate-functions.h"
 
@@ -1016,16 +1017,8 @@ main (int argc, char **argv)
     {
       /* print and exit */
       char** sort_args = build_sort_process_args ();
-      char **p = sort_args;
-      while (*p)
-        {
-          /* TODO: shell quoting / escaping */
-          fputs (*p, stdout);
-          ++p;
-          if (*p)
-            fputc (' ', stdout);
-        }
-      fputc ('\n', stdout);
+      char *cmdline = shell_quote_argv (sort_args);
+      puts (cmdline);
       exit (EXIT_SUCCESS);
     }
 

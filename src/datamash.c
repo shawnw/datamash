@@ -49,6 +49,7 @@
 #include "version-etc.h"
 #include "xstrndup.h"
 #include "xalloc.h"
+#include "sh-quote.h"
 
 #include "text-options.h"
 #include "text-lines.h"
@@ -1062,9 +1063,9 @@ open_input ()
 {
   if (pipe_through_sort && dm->num_grps>0)
     {
-      char tmp[INT_BUFSIZE_BOUND (size_t)*2+5];
-      char cmd[1024];
-      memset (cmd,0,sizeof (cmd));
+      char delim[2] = { 0, 0 };
+      char **args = xcalloc (dm->num_grps + 8, sizeof (char *));
+      int argc = 0;
 
       if (input_header)
         {
@@ -1074,15 +1075,17 @@ open_input ()
              the 'sort' child-process */
           process_input_header (stdin);
         }
-      int len;
-      const char *stable_sort_arg = "", *zero_delim_arg = "",
-	*case_insensitive_arg = "", *delim_arg = "";
+
+#ifdef SORT_WITHOUT_LOCALE
+      args[argc++] = "LC_ALL=C";
+#endif
+      args[argc++] = (char *)sort_cmd;
 #ifdef HAVE_STABLE_SORT
       /* stable sort (-s) is needed to support first/last operations
          (prevent sort from re-ordering lines which are not part of the group.
          '-s' is not standard POSIX, but very commonly supported, including
          on GNU coreutils, Busybox, FreeBSD, MacOSX */
-      stable_sort_arg = "-s ";
+      args[argc++] = "-s";
 #endif
 
       if (eolchar == '\0')
@@ -1090,7 +1093,7 @@ open_input ()
 #ifdef HAVE_ZERO_SORT
           /* sort needs to understand -z to properly sort input using
              NUL as the line delimiter */
-	  zero_delim_arg = "-z ";
+	  args[argc++] = "-z";
 #else
           die (EXIT_FAILURE, 0,
                  _("-s and -z cannot be combined on this system"));
@@ -1098,47 +1101,34 @@ open_input ()
         }
       if (!case_sensitive)
 	{
-	  case_insensitive_arg = "-f ";
+	  args[argc++] = "-f";
 	}
 
       if (in_tab != TAB_WHITESPACE)
         {
-          /* If the delimiter is a single-quote character, use
-             double-quote to prevent shell quoting problems. */
-          const char qc = (in_tab=='\'')?'"':'\'';
-          snprintf (tmp,sizeof (tmp),"-t %c%c%c ",qc,in_tab,qc);
-	  delim_arg = tmp;
+	  args[argc++] = "-t";
+	  delim[0] = in_tab;
+	  args[argc++] = delim;
         }
 
-#ifdef SORT_WITHOUT_LOCALE
-      /* For mingw/windows systems */
-      len = snprintf (cmd, sizeof (cmd), "%s %s%s%s%s", sort_cmd,
-		      stable_sort_arg, zero_delim_arg,
-		      case_insensitive_arg, delim_arg);
-#else
-      len = snprintf (cmd, sizeof (cmd), "LC_ALL=C %s %s%s%s%s", sort_cmd,
-		      stable_sort_arg, zero_delim_arg,
-		      case_insensitive_arg, delim_arg);
-#endif
-      if (len < 0 || (size_t) len >= sizeof (cmd))
-	{
-	  die (EXIT_FAILURE, 0,
-	       _("sort command too-long (please report this bug)"));
-
-	}
-
+      int sort_spec = argc;
       for (size_t i = 0; i < dm->num_grps; ++i)
         {
+	  char tmp[INT_BUFSIZE_BOUND (size_t) * 2 + 5];
           const size_t col_num = dm->grps[i].num;
-          snprintf (tmp,sizeof (tmp),"-k%"PRIuMAX",%"PRIuMAX" ",
+          snprintf (tmp,sizeof (tmp),"-k%"PRIuMAX",%"PRIuMAX,
                     (uintmax_t)col_num,(uintmax_t)col_num);
-          if (strlen (tmp)+strlen (cmd)+1 >= sizeof (cmd))
-            die (EXIT_FAILURE, 0,
-                   _("sort command too-long (please report this bug)"));
-          strcat (cmd,tmp);
+	  args[argc++] = xstrdup (tmp);
         }
 
+      char *cmd = shell_quote_argv (args);
+      while (sort_spec < argc)
+	{
+	  free (args[sort_spec++]);
+	}
+      free (args);
       input_stream = popen (cmd,"r");
+      free (cmd);
       if (input_stream == NULL)
         die (EXIT_FAILURE, 0, _("failed to run 'sort': popen failed"));
     }

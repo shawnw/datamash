@@ -25,7 +25,6 @@
 /xalloc.m4
 /codeset.m4
 /configmake.m4
-/fcntl-o.m4
 /glibc21.m4
 /localcharset.m4
 /locale-fr.m4
