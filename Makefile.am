@@ -90,7 +90,8 @@ decorate_CPPFLAGS = $(AM_CPPFLAGS) \
 
 decorate_LDADD = lib/lib$(PACKAGE).a \
        $(LIBICONV) \
-       $(LIBINTL)
+       $(LIBINTL) \
+       $(LIB_MBRTOWC)
 
 # Add LOCALDIR for gettext
 localedir = $(datadir)/locale
