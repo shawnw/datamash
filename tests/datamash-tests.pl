@@ -343,11 +343,15 @@ my @Tests =
   ['b4', 'max 1',       {IN_PIPE=>$in1},  {OUT => "10\n"}],
   ['b5', 'absmin 1',    {IN_PIPE=>$in1},  {OUT => "1\n"}],
   ['b6', 'absmax 1',    {IN_PIPE=>$in1},  {OUT => "10\n"}],
-  ['b8', 'median 1',    {IN_PIPE=>$in1},  {OUT => "5\n"}],
-  ['b9', 'mode 1',      {IN_PIPE=>$in1},  {OUT => "5\n"}],
-  ['b10', 'antimode 1', {IN_PIPE=>$in1},  {OUT => "1\n"}],
-  ['b11', 'unique 1',   {IN_PIPE=>$in1},  {OUT => "1,10,2,3,4,5,6,7,8,9\n"}],
-  ['b13', 'collapse 1', {IN_PIPE=>$in1},  {OUT => "1,2,3,4,5,6,7,5,8,9,10\n"}],
+  ['b7', 'median 1',    {IN_PIPE=>$in1},  {OUT => "5\n"}],
+  ['b8', 'mode 1',      {IN_PIPE=>$in1},  {OUT => "5\n"}],
+  ['b9', 'antimode 1', {IN_PIPE=>$in1},   {OUT => "1\n"}],
+  ['b10', 'unique 1',   {IN_PIPE=>$in1},  {OUT => "1,10,2,3,4,5,6,7,8,9\n"}],
+  ['b11', '--collapse-delimiter=^ unique 1',
+   {IN_PIPE=>$in1},  {OUT => "1^10^2^3^4^5^6^7^8^9\n"}],
+  ['b12', 'collapse 1', {IN_PIPE=>$in1},  {OUT => "1,2,3,4,5,6,7,5,8,9,10\n"}],
+  ['b13', '--collapse-delimiter=^ collapse 1',
+   {IN_PIPE=>$in1}, {OUT => "1^2^3^4^5^6^7^5^8^9^10\n"}],
 
   # on a different architecture, would printf(%Lg) print something else?
   # Use OUT_SUBST to trim output to 1.3 digits
