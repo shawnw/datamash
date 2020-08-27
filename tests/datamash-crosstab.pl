@@ -183,8 +183,6 @@ my @Tests =
       {ERR=>"$prog: crosstab supports one operation, found 2\n"}],
   ['e7',  'ct 1:2', {IN_PIPE=>""}, {EXIT=>1},
       {ERR=>"$prog: invalid field pair for operation 'crosstab'\n"}],
-  ['e8',  'ct 1-2', {IN_PIPE=>""}, {EXIT=>1},
-      {ERR=>"$prog: invalid field range for operation 'crosstab'\n"}],
 );
 
 my $save_temps = $ENV{SAVE_TEMPS};
