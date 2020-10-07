@@ -29,19 +29,18 @@
 #include "die.h"
 #include "decorate-functions.h"
 
-
 bool
-decorate_as_is (const char* in)
+decorate_as_is (const char *in)
 {
   fprintf (stdout, "%s", in);
   return true;
 }
 
 bool
-decorate_strlen (const char* in)
+decorate_strlen (const char *in)
 {
   uintmax_t u = (uintmax_t)strlen (in);
-  printf ("%0*"PRIuMAX, (int)INT_BUFSIZE_BOUND (u), u);
+  printf ("%0*" PRIuMAX, (int)INT_BUFSIZE_BOUND (u), u);
   return true;
 }
 
@@ -50,28 +49,35 @@ roman_numeral_to_value (char c)
 {
   switch (c)
     {
-    case 'M': return 1000;
-    case 'D': return 500;
-    case 'C': return 100;
-    case 'L': return 50;
-    case 'X': return 10;
-    case 'V': return 5;
-    case 'I': return 1;
-    default:  return 0;
+    case 'M':
+      return 1000;
+    case 'D':
+      return 500;
+    case 'C':
+      return 100;
+    case 'L':
+      return 50;
+    case 'X':
+      return 10;
+    case 'V':
+      return 5;
+    case 'I':
+      return 1;
+    default:
+      return 0;
     }
 }
-
 
 /* Naive implementation of Roman numerals conversion.
    Does not support alternative forms such as
     XIIX,IIXX for 18,
     IIC for 98.  */
 bool
-decorate_roman_numerals (const char* in)
+decorate_roman_numerals (const char *in)
 {
   intmax_t result = 0;
-  intmax_t cur,last = 0;
-  if (*in=='\0')
+  intmax_t cur, last = 0;
+  if (*in == '\0')
     {
       error (0, 0, _("invalid empty roman numeral"));
       return false;
@@ -81,7 +87,8 @@ decorate_roman_numerals (const char* in)
       cur = roman_numeral_to_value (*in);
       if (!cur)
         {
-          error (0, 0, _("invalid roman numeral '%c' in %s"),  *in, quote (in));
+          error (0, 0, _("invalid roman numeral '%c' in %s"), *in,
+                 quote (in));
           return false;
         }
 
@@ -103,12 +110,12 @@ decorate_roman_numerals (const char* in)
     }
 
   result += last;
-  printf ("%0*"PRIiMAX, (int)INT_BUFSIZE_BOUND (result), result);
+  printf ("%0*" PRIiMAX, (int)INT_BUFSIZE_BOUND (result), result);
   return true;
 }
 
 bool
-decorate_ipv4_inet_addr (const char* in)
+decorate_ipv4_inet_addr (const char *in)
 {
   struct in_addr adr;
   int s;
@@ -121,14 +128,12 @@ decorate_ipv4_inet_addr (const char* in)
       return false;
     }
 
-
   printf ("%08X", ntohl (adr.s_addr));
   return true;
 }
 
-
 bool
-decorate_ipv4_dot_decimal (const char* in)
+decorate_ipv4_dot_decimal (const char *in)
 {
   struct in_addr adr;
   int s;
@@ -148,9 +153,8 @@ decorate_ipv4_dot_decimal (const char* in)
   return true;
 }
 
-
 bool
-decorate_ipv6 (const char* in)
+decorate_ipv6 (const char *in)
 {
   struct in6_addr adr;
   int s;
@@ -167,9 +171,9 @@ decorate_ipv6 (const char* in)
     }
 
   /* A portable way to print IPv6 binary representation. */
-  for (int i=0;i<16;i+=2)
+  for (int i = 0; i < 16; i += 2)
     {
-      printf ("%02X%02X", adr.s6_addr[i], adr.s6_addr[i+1]);
+      printf ("%02X%02X", adr.s6_addr[i], adr.s6_addr[i + 1]);
       if (i != 14)
         fputc (':', stdout);
     }
@@ -177,15 +181,13 @@ decorate_ipv6 (const char* in)
   return true;
 }
 
-
-
 struct conversions_t builtin_conversions[] = {
-  { "as-is",    "copy as-is", decorate_as_is },     /* for debugging */
-  { "roman",    "roman numerals", decorate_roman_numerals },
-  { "strlen",   "length (in bytes) of the specified field", decorate_strlen },
-  { "ipv4",     "dotted-decimal IPv4 addresses", decorate_ipv4_dot_decimal },
-  { "ipv6",     "IPv6 addresses", decorate_ipv6 },
+  { "as-is", "copy as-is", decorate_as_is }, /* for debugging */
+  { "roman", "roman numerals", decorate_roman_numerals },
+  { "strlen", "length (in bytes) of the specified field", decorate_strlen },
+  { "ipv4", "dotted-decimal IPv4 addresses", decorate_ipv4_dot_decimal },
+  { "ipv6", "IPv6 addresses", decorate_ipv6 },
   { "ipv4inet", "number-and-dots IPv4 addresses (incl. octal, hex values)",
     decorate_ipv4_inet_addr },
-  { NULL,       NULL, 0 }
+  { NULL, NULL, 0 }
 };

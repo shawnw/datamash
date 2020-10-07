@@ -36,20 +36,19 @@
 #include "utils.h"
 #include "text-options.h"
 
-
 static bool _GL_ATTRIBUTE_PURE
-str_comparator (const void* a, const void* b)
+str_comparator (const void *a, const void *b)
 {
-  assert (a!=NULL && b!=NULL);                   /* LCOV_EXCL_LINE */
-  if (a==b)
+  assert (a != NULL && b != NULL); /* LCOV_EXCL_LINE */
+  if (a == b)
     return true;
-  return (STREQ ((const char*)a, (const char*)b));
+  return (STREQ ((const char *)a, (const char *)b));
 }
 
 static size_t _GL_ATTRIBUTE_PURE
 hash_crosstab_data_cell (void const *x, size_t tablesize)
 {
-  struct crosstab_datacell *dc = (struct crosstab_datacell*)x;
+  struct crosstab_datacell *dc = (struct crosstab_datacell *)x;
 
   const char *s;
   size_t h = 0;
@@ -64,20 +63,19 @@ hash_crosstab_data_cell (void const *x, size_t tablesize)
 }
 
 static bool _GL_ATTRIBUTE_PURE
-crosstab_datacell_comparator (const void* a, const void* b)
+crosstab_datacell_comparator (const void *a, const void *b)
 {
-  assert (a!=NULL && b!=NULL);                   /* LCOV_EXCL_LINE */
-  if (a==b)
+  assert (a != NULL && b != NULL); /* LCOV_EXCL_LINE */
+  if (a == b)
     return true;
-  const struct crosstab_datacell *da = (struct crosstab_datacell*)a;
-  const struct crosstab_datacell *db = (struct crosstab_datacell*)b;
+  const struct crosstab_datacell *da = (struct crosstab_datacell *)a;
+  const struct crosstab_datacell *db = (struct crosstab_datacell *)b;
   return (STREQ (da->row_name, db->row_name)
           && STREQ (da->col_name, db->col_name));
 }
 
-
-struct crosstab_datacell*
-new_datacell (const char* row, const char* col, const char* data)
+struct crosstab_datacell *
+new_datacell (const char *row, const char *col, const char *data)
 {
   struct crosstab_datacell *dc = xmalloc (sizeof (struct crosstab_datacell));
   dc->row_name = row;
@@ -89,7 +87,7 @@ new_datacell (const char* row, const char* col, const char* data)
 static void
 crosstab_datacell_free (void *a)
 {
-  struct crosstab_datacell *dc = (struct crosstab_datacell*)a;
+  struct crosstab_datacell *dc = (struct crosstab_datacell *)a;
   dc->row_name = NULL;
   dc->col_name = NULL;
   dc->data = NULL;
@@ -97,23 +95,23 @@ crosstab_datacell_free (void *a)
 }
 
 /* Setup needed variables for the cross-tabulation */
-struct crosstab*
+struct crosstab *
 crosstab_init ()
 {
   struct crosstab *ct = XMALLOC (struct crosstab);
 
-  ct->rows    = hash_initialize (1000,NULL,hash_pjw,str_comparator,free);
-  ct->columns = hash_initialize (1000,NULL,hash_pjw,str_comparator,free);
-  ct->data    = hash_initialize (1000,NULL,hash_crosstab_data_cell,
-                                crosstab_datacell_comparator,
-                                crosstab_datacell_free);
+  ct->rows = hash_initialize (1000, NULL, hash_pjw, str_comparator, free);
+  ct->columns = hash_initialize (1000, NULL, hash_pjw, str_comparator, free);
+  ct->data
+      = hash_initialize (1000, NULL, hash_crosstab_data_cell,
+                         crosstab_datacell_comparator, crosstab_datacell_free);
   return ct;
 }
 
 void
-crosstab_free (struct crosstab* ct)
+crosstab_free (struct crosstab *ct)
 {
-  assert (ct!=NULL);                             /* LCOV_EXCL_LINE */
+  assert (ct != NULL); /* LCOV_EXCL_LINE */
   hash_free (ct->rows);
   ct->rows = NULL;
   hash_free (ct->columns);
@@ -125,35 +123,34 @@ crosstab_free (struct crosstab* ct)
 
 /* Add new cross-tabulation result */
 void
-crosstab_add_result (struct crosstab* ct,
-                      const char* row, const char* col, const char* data)
+crosstab_add_result (struct crosstab *ct, const char *row, const char *col,
+                     const char *data)
 {
-  const char* r = hash_lookup (ct->rows, row);
-  if (r==NULL)
+  const char *r = hash_lookup (ct->rows, row);
+  if (r == NULL)
     r = hash_insert (ct->rows, xstrdup (row));
 
-  const char* c = hash_lookup (ct->columns, col);
-  if (c==NULL)
+  const char *c = hash_lookup (ct->columns, col);
+  if (c == NULL)
     c = hash_insert (ct->columns, xstrdup (col));
 
-  struct crosstab_datacell *ctdc = new_datacell (r,c,xstrdup (data));
+  struct crosstab_datacell *ctdc = new_datacell (r, c, xstrdup (data));
   ignore_value (hash_insert (ct->data, ctdc));
 }
 
-
 /* Print table */
 void
-crosstab_print (const struct crosstab* ct)
+crosstab_print (const struct crosstab *ct)
 {
   const size_t n_rows = hash_get_n_entries (ct->rows);
-  char** rows_list = XNMALLOC (n_rows,char*);
-  hash_get_entries (ct->rows, (void**)rows_list, n_rows);
-  qsort (rows_list, n_rows, sizeof (char*), cmpstringp);
+  char **rows_list = XNMALLOC (n_rows, char *);
+  hash_get_entries (ct->rows, (void **)rows_list, n_rows);
+  qsort (rows_list, n_rows, sizeof (char *), cmpstringp);
 
   const size_t n_cols = hash_get_n_entries (ct->columns);
-  char** cols_list = XNMALLOC (n_cols,char*);
-  hash_get_entries (ct->columns, (void**)cols_list, n_cols);
-  qsort (cols_list, n_cols, sizeof (char*), cmpstringp);
+  char **cols_list = XNMALLOC (n_cols, char *);
+  hash_get_entries (ct->columns, (void **)cols_list, n_cols);
+  qsort (cols_list, n_cols, sizeof (char *), cmpstringp);
 
   /* Print columns */
   for (size_t c = 0; c < n_cols; ++c)
@@ -176,7 +173,7 @@ crosstab_print (const struct crosstab* ct)
 
           const struct crosstab_datacell *dc = hash_lookup (ct->data, &curr);
           print_field_separator ();
-          fputs ((dc==NULL)?missing_field_filler:dc->data, stdout);
+          fputs ((dc == NULL) ? missing_field_filler : dc->data, stdout);
         }
 
       print_line_separator ();

@@ -36,10 +36,11 @@
 #include "text-lines.h"
 #include "column-headers.h"
 
-static size_t num_input_column_headers = 0 ;
-static char** input_column_headers;
+static size_t num_input_column_headers = 0;
+static char **input_column_headers;
 
-void free_column_headers ()
+void
+free_column_headers ()
 {
   for (size_t i = 0; i < num_input_column_headers; ++i)
     {
@@ -56,23 +57,23 @@ get_num_column_headers ()
   return num_input_column_headers;
 }
 
-const char* _GL_ATTRIBUTE_PURE
+const char *_GL_ATTRIBUTE_PURE
 get_input_field_name (size_t field_num)
 {
   assert (field_num > 0                              /* LCOV_EXCL_LINE */
           && field_num <= num_input_column_headers); /* LCOV_EXCL_LINE */
-  return input_column_headers[field_num-1];
+  return input_column_headers[field_num - 1];
 }
 
 size_t _GL_ATTRIBUTE_PURE
-get_input_field_number (const char* field_name)
+get_input_field_number (const char *field_name)
 {
   assert (field_name != NULL); /* LCOV_EXCL_LINE */
   assert (*field_name != 0);   /* LCOV_EXCL_LINE */
-  for (size_t i = 0 ; i < num_input_column_headers ; ++i)
+  for (size_t i = 0; i < num_input_column_headers; ++i)
     {
-      if (STREQ (field_name,input_column_headers[i]))
-        return i+1;
+      if (STREQ (field_name, input_column_headers[i]))
+        return i + 1;
     }
   return 0;
 }
@@ -83,28 +84,28 @@ build_input_line_headers (const struct line_record_t *lr, bool store_names)
   char *str;
   size_t len = 0;
   const size_t num_fields = line_record_num_fields (lr);
-  const size_t field_name_buf_size = 7+INT_BUFSIZE_BOUND (size_t)+1;
+  const size_t field_name_buf_size = 7 + INT_BUFSIZE_BOUND (size_t) + 1;
 
   num_input_column_headers = num_fields;
-  input_column_headers = XNMALLOC (num_fields, char*);
+  input_column_headers = XNMALLOC (num_fields, char *);
 
   for (size_t i = 1; i <= num_fields; ++i)
     {
       if (!store_names)
         {
-          str = xmalloc ( field_name_buf_size );
-          ignore_value (snprintf (str, field_name_buf_size,
-                                  "field-%"PRIuMAX,(uintmax_t)i));
+          str = xmalloc (field_name_buf_size);
+          ignore_value (snprintf (str, field_name_buf_size, "field-%" PRIuMAX,
+                                  (uintmax_t)i));
         }
       else
         {
-          const char* tmp = NULL;
+          const char *tmp = NULL;
           line_record_get_field (lr, i, &tmp, &len);
-          str = xmalloc ( len+1 );
+          str = xmalloc (len + 1);
           memcpy (str, tmp, len);
           str[len] = 0;
         }
 
-      input_column_headers[i-1] = str;
+      input_column_headers[i - 1] = str;
     }
 }

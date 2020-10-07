@@ -41,7 +41,7 @@ enum field_operation
   OP_MEDIAN,
   OP_QUARTILE_1,
   OP_QUARTILE_3,
-  OP_IQR,       /* Inter-quartile range */
+  OP_IQR, /* Inter-quartile range */
   OP_PERCENTILE,
   OP_PSTDEV,    /* Population Standard Deviation */
   OP_SSTDEV,    /* Sample Standard Deviation */
@@ -50,12 +50,12 @@ enum field_operation
   OP_MAD,       /* MAD - Median Absolute Deviation, with adjustment constant of
                    1.4826 for normal distribution */
   OP_MADRAW,    /* MAD (same as above), with constant=1 */
-  OP_S_SKEWNESS,/* Sample Skewness */
-  OP_P_SKEWNESS,/* Population Skewness */
+  OP_S_SKEWNESS,        /* Sample Skewness */
+  OP_P_SKEWNESS,        /* Population Skewness */
   OP_S_EXCESS_KURTOSIS, /* Sample Excess Kurtosis */
   OP_P_EXCESS_KURTOSIS, /* Population Excess Kurtosis */
-  OP_JARQUE_BERA,   /* Jarque-Bera test of normality */
-  OP_DP_OMNIBUS,    /* D'Agostino-Pearson omnibus test of normality */
+  OP_JARQUE_BERA,       /* Jarque-Bera test of normality */
+  OP_DP_OMNIBUS,        /* D'Agostino-Pearson omnibus test of normality */
   OP_MODE,
   OP_ANTIMODE,
   OP_UNIQUE,        /* Collapse Unique string into comma separated values */
@@ -105,18 +105,15 @@ enum processing_mode
 /* Given a text string, returns the matching operation, or OP_INVALID.
    if 'mode' is not NULL, stores the implied processing mode
    (e.g. sum=>MODE_GROUPBY,  md5=>MODE_PER_LINE). */
-enum field_operation
-get_field_operation (const char* s, enum processing_mode* /*out*/ mode);
+enum field_operation get_field_operation (const char *s,
+                                          enum processing_mode * /*out*/ mode);
 
-const char*
-get_field_operation_name (enum field_operation op);
+const char *get_field_operation_name (enum field_operation op);
 
 /* Given a text string,
    returns the matching processing mode, or MODE_INVALID. */
-enum processing_mode
-get_processing_mode (const char* s);
+enum processing_mode get_processing_mode (const char *s);
 
-const char*
-get_processing_mode_name (enum processing_mode m);
+const char *get_processing_mode_name (enum processing_mode m);
 
 #endif

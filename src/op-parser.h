@@ -24,25 +24,25 @@
 
 struct group_column_t
 {
-  size_t num;       /* 1 = first field */
-  bool   by_name;   /* true if the user gave a column name */
-  char*  name;      /* column name - to be converted to number after
-                       header line is read */
+  size_t num;   /* 1 = first field */
+  bool by_name; /* true if the user gave a column name */
+  char *name;   /* column name - to be converted to number after
+                   header line is read */
 };
 
 struct op_column_t
 {
-  size_t num;                /* 1 = first field */
-  bool   by_name;            /* true if the user gave a column name */
-  char*  name;               /* column name - to be converted to number after
-                                header line is read */
-  enum   field_operation op;
+  size_t num;   /* 1 = first field */
+  bool by_name; /* true if the user gave a column name */
+  char *name;   /* column name - to be converted to number after
+                   header line is read */
+  enum field_operation op;
 };
 
 struct mode_check_params_t
 {
-  uintmax_t n_lines;         /* If not zero, require this number of lines */
-  uintmax_t n_fields;        /* if not zero, require this number of fields */
+  uintmax_t n_lines;  /* If not zero, require this number of lines */
+  uintmax_t n_fields; /* if not zero, require this number of fields */
 };
 
 struct datamash_ops
@@ -55,7 +55,7 @@ struct datamash_ops
   size_t num_grps;
   size_t alloc_grps;
 
-  struct fieldop    *ops;  /* field operations */
+  struct fieldop *ops; /* field operations */
   size_t num_ops;
   size_t alloc_ops;
 
@@ -73,23 +73,19 @@ struct datamash_ops
    1. The first word is either a mode (e.g. transpose/groupby/reverse)
       or an operation (e.g. sum/min/max) - implying a 'group-by' mode.
    2. The rest of the parameters are operations. */
-struct datamash_ops*
-datamash_ops_parse ( int argc, const char* argv[] );
+struct datamash_ops *datamash_ops_parse (int argc, const char *argv[]);
 
 /* Parse the operations, return new datamash_ops structure.
    This function assumes old syntax:
     The user already specified "-g X,Y,Z" - the processing mode is known,
     and the grouping text 'X,Y,Z' is known.
    The function will only accept operations (e.g. sum/min/max). */
-struct datamash_ops*
-datamash_ops_parse_premode ( enum processing_mode pm,
-                             const char* grouping_spec,
-                             int argc, const char* argv[] );
+struct datamash_ops *datamash_ops_parse_premode (enum processing_mode pm,
+                                                 const char *grouping_spec,
+                                                 int argc, const char *argv[]);
 
-void
-datamash_ops_debug_print ( const struct datamash_ops* p );
+void datamash_ops_debug_print (const struct datamash_ops *p);
 
-void
-datamash_ops_free (struct datamash_ops *p);
+void datamash_ops_free (struct datamash_ops *p);
 
 #endif

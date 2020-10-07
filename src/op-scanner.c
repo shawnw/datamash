@@ -37,45 +37,45 @@
 /* Used by other modules */
 uintmax_t scan_val_int;
 long double scan_val_float;
-char* scanner_identifier;
+char *scanner_identifier;
 bool scanner_keep_whitespace = false;
 
 /* Internal */
-static char* scanner_input;
-static char* scan_pos;
+static char *scanner_input;
+static char *scan_pos;
 static size_t scanner_identifier_len;
 static bool have_peek;
 static enum TOKEN scan_peek;
 
 static inline void
-set_identifier (const char* data, size_t n)
+set_identifier (const char *data, size_t n)
 {
-  if (n>=scanner_identifier_len)
+  if (n >= scanner_identifier_len)
     {
-      scanner_identifier = xrealloc (scanner_identifier,n+1);
-      scanner_identifier_len = n+1;
+      scanner_identifier = xrealloc (scanner_identifier, n + 1);
+      scanner_identifier_len = n + 1;
     }
   memcpy (scanner_identifier, data, n);
-  scanner_identifier[n]=0;
+  scanner_identifier[n] = 0;
 }
 
 /* Concatante argv into one (space separated) string */
 void
-scanner_set_input_from_argv (int argc, const char* argv[])
+scanner_set_input_from_argv (int argc, const char *argv[])
 {
-  assert (scanner_input == NULL);                /* LCOV_EXCL_LINE */
+  assert (scanner_input == NULL); /* LCOV_EXCL_LINE */
 
   size_t len = 1; /* +1 for NUL */
-  for (int i=0;i<argc;++i)
-    len += strlen (argv[i])+1; /* +1 for space */
+  for (int i = 0; i < argc; ++i)
+    len += strlen (argv[i]) + 1; /* +1 for space */
 
   char *p = scan_pos = scanner_input = XCALLOC (len, char);
-  for (int i=0; i<argc; ++i)
-  {
-      if (i>0)
+  for (int i = 0; i < argc; ++i)
+    {
+      if (i > 0)
         p = stpcpy (p, " ");
       p = stpcpy (p, argv[i]);
-  }
+    }
 }
 
 void
@@ -114,7 +114,7 @@ scanner_get_token ()
       return scan_peek;
     }
 
-  assert (scan_pos != NULL);                      /* LCOV_EXCL_LINE */
+  assert (scan_pos != NULL); /* LCOV_EXCL_LINE */
 
   if (*scan_pos == '\0')
     return TOK_END;
@@ -122,7 +122,7 @@ scanner_get_token ()
   /* White space */
   if (c_isspace (*scan_pos))
     {
-      while ( c_isspace (*scan_pos) )
+      while (c_isspace (*scan_pos))
         ++scan_pos;
       if (scanner_keep_whitespace)
         {
@@ -165,11 +165,10 @@ scanner_get_token ()
           scan_val_float = strtold (scan_pos, &pend);
           rc = TOK_FLOAT;
         }
-      if ((c_isalpha (*pend) || *pend=='_') || (errno == ERANGE))
-        die (EXIT_FAILURE, 0, _("invalid numeric value '%s'"),
-                                scan_pos);
+      if ((c_isalpha (*pend) || *pend == '_') || (errno == ERANGE))
+        die (EXIT_FAILURE, 0, _("invalid numeric value '%s'"), scan_pos);
 
-      set_identifier (scan_pos, pend-scan_pos);
+      set_identifier (scan_pos, pend - scan_pos);
       scan_pos = pend;
       return rc;
     }
@@ -183,7 +182,7 @@ scanner_get_token ()
       char *v = scan_pos;
       while (1)
         {
-          if (c_isalpha (*v) || c_isdigit (*v) || *v=='_' )
+          if (c_isalpha (*v) || c_isdigit (*v) || *v == '_')
             {
               // Accept charracter
             }
@@ -198,7 +197,7 @@ scanner_get_token ()
           else
             break;
 
-          if (len >= (MAX_IDENTIFIER_LENGTH-1))
+          if (len >= (MAX_IDENTIFIER_LENGTH - 1))
             die (EXIT_FAILURE, 0, _("identifier name too long"));
 
           ident[len++] = *v;
@@ -216,7 +215,6 @@ scanner_get_token ()
   return TOK_END;
 }
 
-
 #ifdef SCANNER_TEST_MAIN
 /*
  Trivial scanner tester.
@@ -231,46 +229,49 @@ scanner_get_token ()
     ./dm-scanner foo bar 9.5f
 */
 #define TESTMAIN main
-int TESTMAIN (int argc, const char* argv[])
+int
+TESTMAIN (int argc, const char *argv[])
 {
-  if (argc<2)
+  if (argc < 2)
     die (EXIT_FAILURE, 0, _("missing script (among arguments)"));
 
-  scanner_set_input_from_argv (argc-1, argv+1);
+  scanner_set_input_from_argv (argc - 1, argv + 1);
 
   enum TOKEN tok;
-  while ( (tok = scanner_get_token ()) != TOK_END )
-  {
-    switch (tok)
+  while ((tok = scanner_get_token ()) != TOK_END)
     {
-    case TOK_IDENTIFIER:
-      printf ("TOK_IDENTIFIER: '%s'\n", scanner_identifier);
-      break;
+      switch (tok)
+        {
+        case TOK_IDENTIFIER:
+          printf ("TOK_IDENTIFIER: '%s'\n", scanner_identifier);
+          break;
 
-    case TOK_INTEGER:
-      printf ("TOK_INTEGER: %lu ('%s')\n", scan_val_int, scanner_identifier);
-      break;
+        case TOK_INTEGER:
+          printf ("TOK_INTEGER: %lu ('%s')\n", scan_val_int,
+                  scanner_identifier);
+          break;
 
-    case TOK_FLOAT:
-      printf ("TOK_FLOAT: %Lf ('%s')\n", scan_val_float, scanner_identifier);
-      break;
+        case TOK_FLOAT:
+          printf ("TOK_FLOAT: %Lf ('%s')\n", scan_val_float,
+                  scanner_identifier);
+          break;
 
-    case TOK_COMMA:
-      printf ("TOK_COMMA\n");
-      break;
+        case TOK_COMMA:
+          printf ("TOK_COMMA\n");
+          break;
 
-    case TOK_DASH:
-      printf ("TOK_DASH\n");
-      break;
+        case TOK_DASH:
+          printf ("TOK_DASH\n");
+          break;
 
-    case TOK_COLONS:
-      printf ("TOK_COLONS\n");
-      break;
+        case TOK_COLONS:
+          printf ("TOK_COLONS\n");
+          break;
 
-    default:
-      die (EXIT_FAILURE, 0 ,_("unknown token %d\n"),tok);
+        default:
+          die (EXIT_FAILURE, 0, _("unknown token %d\n"), tok);
+        }
     }
-  }
 
   return 0;
 }

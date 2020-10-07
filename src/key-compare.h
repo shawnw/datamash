@@ -16,10 +16,9 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #ifndef KEY_COMPARE_H
-# define KEY_COMPARE_H
+#define KEY_COMPARE_H
 
 #define UCHAR_LIM (UCHAR_MAX + 1)
-
 
 /* The representation of the decimal point in the current locale.  */
 extern int decimal_point;
@@ -36,59 +35,67 @@ extern bool hard_LC_TIME;
 #define NONZERO(x) ((x) != 0)
 
 /* The kind of blanks for '-b' to skip in various options. */
-enum blanktype { bl_start, bl_end, bl_both };
+enum blanktype
+{
+  bl_start,
+  bl_end,
+  bl_both
+};
 
 /* Lines are held in core as counted strings. */
 struct line
 {
-  char *text;			/* Text of the line. */
-  size_t length;		/* Length including final newline. */
-  char *keybeg;			/* Start of first key. */
-  char *keylim;			/* Limit of first key. */
+  char *text;    /* Text of the line. */
+  size_t length; /* Length including final newline. */
+  char *keybeg;  /* Start of first key. */
+  char *keylim;  /* Limit of first key. */
 };
 
 /* Sort key.  */
 struct keyfield
 {
-  size_t sword;			/* Zero-origin 'word' to start at. */
-  size_t schar;			/* Additional characters to skip. */
-  size_t eword;			/* Zero-origin last 'word' of key. */
-  size_t echar;			/* Additional characters in field. */
-  bool const *ignore;		/* Boolean array of characters to ignore. */
-  char const *translate;	/* Translation applied to characters. */
-  bool skipsblanks;		/* Skip leading blanks when finding start.  */
-  bool skipeblanks;		/* Skip leading blanks when finding end.  */
-  bool numeric;			/* Flag for numeric comparison.  Handle
-                                   strings of digits with optional decimal
-                                   point, but no exponential notation. */
+  size_t sword;          /* Zero-origin 'word' to start at. */
+  size_t schar;          /* Additional characters to skip. */
+  size_t eword;          /* Zero-origin last 'word' of key. */
+  size_t echar;          /* Additional characters in field. */
+  bool const *ignore;    /* Boolean array of characters to ignore. */
+  char const *translate; /* Translation applied to characters. */
+  bool skipsblanks;      /* Skip leading blanks when finding start.  */
+  bool skipeblanks;      /* Skip leading blanks when finding end.  */
+  bool numeric;          /* Flag for numeric comparison.  Handle
+                            strings of digits with optional decimal
+                            point, but no exponential notation. */
 #ifdef KEY_COMPARE_RANDOM
-  bool random;			/* Sort by random hash of key.  */
+  bool random; /* Sort by random hash of key.  */
 #endif
-  bool general_numeric;		/* Flag for general, numeric comparison.
-                                   Handle numbers in exponential notation. */
+  bool general_numeric; /* Flag for general, numeric comparison.
+                           Handle numbers in exponential notation. */
 #ifdef KEY_COMPARE_HUMAN_NUMERIC
-  bool human_numeric;		/* Flag for sorting by human readable
-                                   units with either SI xor IEC prefixes. */
+  bool human_numeric; /* Flag for sorting by human readable
+                         units with either SI xor IEC prefixes. */
 #endif
 #ifdef KEY_COMPARE_MONTH
-  bool month;			/* Flag for comparison by month name. */
+  bool month; /* Flag for comparison by month name. */
 #endif
 #ifdef KEY_COMPARE_REVERSE
-  bool reverse;			/* Reverse the sense of comparison. */
+  bool reverse; /* Reverse the sense of comparison. */
 #endif
 #ifdef KEY_COMPARE_VERSION
-  bool version;			/* sort by version number */
+  bool version; /* sort by version number */
 #endif
 #ifdef KEY_COMPARE_DECORATION
-  bool (*decorate_fn)(const char* in);
-  const char* decorate_cmd;
+  bool (*decorate_fn) (const char *in);
+  const char *decorate_cmd;
 #endif
-  bool traditional_used;	/* Traditional key option format is used. */
-  struct keyfield *next;	/* Next keyfield to try. */
+  bool traditional_used; /* Traditional key option format is used. */
+  struct keyfield *next; /* Next keyfield to try. */
 };
 
 /* If TAB has this value, blanks separate fields.  */
-enum { TAB_DEFAULT = CHAR_MAX + 1 };
+enum
+{
+  TAB_DEFAULT = CHAR_MAX + 1
+};
 
 /* Tab character separating fields.  If TAB_DEFAULT, then fields are
    separated by the empty string between a non-blank character and a blank
@@ -101,23 +108,19 @@ extern struct keyfield *keylist;
 /* Return a pointer to the first character of the field specified
    by KEY in LINE. */
 
-char *
-begfield (struct line const *line, struct keyfield const *key);
+char *begfield (struct line const *line, struct keyfield const *key);
 
 /* Return the limit of (a pointer to the first character after) the field
    in LINE specified by KEY. */
 
-char *
-limfield (struct line const *line, struct keyfield const *key);
+char *limfield (struct line const *line, struct keyfield const *key);
 
 /* Insert a malloc'd copy of key KEY_ARG at the end of the key list.  */
 
-extern struct keyfield*
-insertkey (struct keyfield *key_arg);
+extern struct keyfield *insertkey (struct keyfield *key_arg);
 
 /* Report a bad field specification SPEC, with extra info MSGID.  */
-void badfieldspec (char const *, char const *)
-     ATTRIBUTE_NORETURN;
+void badfieldspec (char const *, char const *) ATTRIBUTE_NORETURN;
 
 /* Parse the leading integer in STRING and store the resulting value
    (which must fit into size_t) into *VAL.  Return the address of the
@@ -125,29 +128,24 @@ void badfieldspec (char const *, char const *)
    substitute SIZE_MAX.  If MSGID is NULL, return NULL after
    failure; otherwise, report MSGID and exit on failure.  */
 
-char const *
-parse_field_count (char const *string, size_t *val, char const *msgid);
+char const *parse_field_count (char const *string, size_t *val,
+                               char const *msgid);
 
 /* Set the ordering options for KEY specified in S.
    Return the address of the first character in S that
    is not a valid ordering option.
    BLANKTYPE is the kind of blanks that 'b' should skip. */
 
-char *
-set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype);
+char *set_ordering (char const *s, struct keyfield *key,
+                    enum blanktype blanktype);
 
 /* Initialize KEY.  */
-struct keyfield *
-key_init (struct keyfield *key);
+struct keyfield *key_init (struct keyfield *key);
 
 /* print the key spec as a parameter */
-void
-debug_keylist (FILE* stream);
+void debug_keylist (FILE *stream);
 
-char*
-debug_keyfield (const struct keyfield *key);
-
-
+char *debug_keyfield (const struct keyfield *key);
 
 /* Initializes 'common' key-comparison global variables:
     thousand_sep
@@ -158,7 +156,6 @@ debug_keyfield (const struct keyfield *key);
 
     This function should be called once from main .
  */
-void
-init_key_spec (void);
+void init_key_spec (void);
 
 #endif /* KEY_COMPARE_H */

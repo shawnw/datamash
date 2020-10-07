@@ -37,16 +37,16 @@ char eolchar = '\n';
    separated by the empty string between a non-blank character and a blank
    character. */
 int in_tab = '\t';
-int out_tab= '\t';
+int out_tab = '\t';
 
 /* Global case-sensitivity option. Defaults to 'true' . */
 bool case_sensitive = true;
 
 /* In the future: allow users to change this */
-char* numeric_output_format = "%.14Lg";
+char *numeric_output_format = "%.14Lg";
 
 /* number of bytes to allocate for output buffer */
-int   numeric_output_bufsize = 200;
+int numeric_output_bufsize = 200;
 
 /* The character used to separate collapsed/uniqued strings */
 /* In the future: allow users to change this */
@@ -62,7 +62,7 @@ bool strict = true;
 
 /* if 'strict' is false, lines with fewer-than-expected fields
    will be filled with this value */
-char* missing_field_filler = "N/A";
+char *missing_field_filler = "N/A";
 
 /* if true, skip comments line (lines starting with optional whitespace
    followed by '#' or ';'. See line_record_is_comment.  */
@@ -78,7 +78,7 @@ init_blank_table (void)
 
   for (i = 0; i < UCHAR_LIM; ++i)
     {
-      blanks[i] = !! isblank (i);
+      blanks[i] = !!isblank (i);
     }
 }
 
@@ -88,8 +88,6 @@ init_blank_table (void)
 void print_field_separator ();
 void print_line_separator ();
 
-
-
 /* Calculate the required size of the output buffer */
 static void
 finalize_numeric_output_buffer ()
@@ -97,11 +95,11 @@ finalize_numeric_output_buffer ()
   char c;
   long double d = LDBL_MAX;
   int n = snprintf (&c, 1, numeric_output_format, d);
-  numeric_output_bufsize = n + 100 ;
+  numeric_output_bufsize = n + 100;
 }
 
 void
-set_numeric_output_precision (const char* digits)
+set_numeric_output_precision (const char *digits)
 {
   long int l;
   char *p;
@@ -112,9 +110,9 @@ set_numeric_output_precision (const char* digits)
 
   errno = 0;
   l = strtol (digits, &p, 10);
-  if (errno != 0 || *p != '\0' || l <=0 || l> 50)
+  if (errno != 0 || *p != '\0' || l <= 0 || l > 50)
     die (EXIT_FAILURE, 0, _("invalid rounding digits value %s"),
-	 quote (digits));
+         quote (digits));
 
   snprintf (tmp, sizeof (tmp), "%%.%dLf", (int)l);
   numeric_output_format = xstrdup (tmp);
@@ -123,7 +121,7 @@ set_numeric_output_precision (const char* digits)
 }
 
 void
-set_numeric_printf_format (const char* format)
+set_numeric_printf_format (const char *format)
 {
   numeric_output_format = validate_double_format (format);
   finalize_numeric_output_buffer ();

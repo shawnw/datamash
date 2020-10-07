@@ -20,7 +20,6 @@
 #ifndef __DOUBLE_FORMAT_H__
 #define __DOUBLE_FORMAT_H__
 
-char*
-validate_double_format (char const *fmt);
+char *validate_double_format (char const *fmt);
 
 #endif

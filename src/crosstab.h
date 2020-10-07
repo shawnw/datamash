@@ -31,25 +31,21 @@ struct crosstab
 
 struct crosstab_datacell
 {
-  const char* row_name;
-  const char* col_name;
-  const char* data;
+  const char *row_name;
+  const char *col_name;
+  const char *data;
 };
 
-struct crosstab_data_cell*
-crosstab_new_datacell (const char* row, const char* col, const char* data);
+struct crosstab_data_cell *
+crosstab_new_datacell (const char *row, const char *col, const char *data);
 
-struct crosstab*
-crosstab_init ();
+struct crosstab *crosstab_init ();
 
-void
-crosstab_add_result (struct crosstab* ct,
-                      const char* row, const char* col, const char* data);
+void crosstab_add_result (struct crosstab *ct, const char *row,
+                          const char *col, const char *data);
 
-void
-crosstab_print ();
+void crosstab_print ();
 
-void
-crosstab_free (struct crosstab* ct);
+void crosstab_free (struct crosstab *ct);
 
 #endif /* __CROSSTAB_H__ */

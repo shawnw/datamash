@@ -37,13 +37,12 @@
 /* The official name of this program (e.g., no 'g' prefix).  */
 #define PROGRAM_NAME "decorate"
 
-#define AUTHORS \
-  proper_name ("Assaf Gordon")
+#define AUTHORS proper_name ("Assaf Gordon")
 
 static bool debug_print_pid = false;
 
 static void _GL_ATTRIBUTE_FORMAT ((__printf__, 1, 2))
-dbg_printf (char const *msg, ...)
+    dbg_printf (char const *msg, ...)
 {
   va_list args;
   /* TODO: use gnulib's 'program_name' instead?  */
@@ -59,7 +58,7 @@ dbg_printf (char const *msg, ...)
 }
 
 /* Until someone better comes along */
-const char version_etc_copyright[] = "Copyright %s %d Assaf Gordon" ;
+const char version_etc_copyright[] = "Copyright %s %d Assaf Gordon";
 
 /* if true, enable developer's debug messages */
 static bool debug = false;
@@ -73,8 +72,8 @@ static char **sort_extra_args = NULL;
 static size_t sort_extra_args_used = 0;
 static size_t sort_extra_args_allocated = 0;
 
-static long skip_header_lines = 0 ;
-static FILE* header_out = NULL ;
+static long skip_header_lines = 0;
+static FILE *header_out = NULL;
 
 enum
 {
@@ -92,40 +91,37 @@ enum
   PARALLEL_OPTION
 };
 
-static struct option const longopts[] =
-{
-  {"key", required_argument, NULL, 'k'},
-  {"decorate", no_argument, NULL, DECORATE_OPTION},
-  {"undecorate", required_argument, NULL, UNDECORATE_OPTION},
-  {"-debug", no_argument, NULL, DEBUG_OPTION},
-  {"zero-terminated", no_argument, NULL, 'z'},
-  {"print-sort-args", no_argument, NULL, PRINT_SORT_ARGS_OPTION},
-  {"header", required_argument, NULL, HEADER_OPTION},
+static struct option const longopts[]
+    = { { "key", required_argument, NULL, 'k' },
+        { "decorate", no_argument, NULL, DECORATE_OPTION },
+        { "undecorate", required_argument, NULL, UNDECORATE_OPTION },
+        { "-debug", no_argument, NULL, DEBUG_OPTION },
+        { "zero-terminated", no_argument, NULL, 'z' },
+        { "print-sort-args", no_argument, NULL, PRINT_SORT_ARGS_OPTION },
+        { "header", required_argument, NULL, HEADER_OPTION },
 
-  /* sort options, passed as-is to the sort process */
-  {"check", optional_argument, NULL, CHECK_OPTION},
-  {"compress-program", required_argument, NULL, COMPRESS_PROGRAM_OPTION},
-  {"random-source", required_argument, NULL, RANDOM_SOURCE_OPTION},
-  {"stable", no_argument, NULL, 's'},
-  {"batch-size", required_argument, NULL, NMERGE_OPTION},
-  {"buffer-size", required_argument, NULL, 'S'},
-  {"field-separator", required_argument, NULL, 't'},
-  {"temporary-directory", required_argument, NULL, 'T'},
-  {"unique", no_argument, NULL, 'u'},
-  {"parallel", required_argument, NULL, PARALLEL_OPTION},
+        /* sort options, passed as-is to the sort process */
+        { "check", optional_argument, NULL, CHECK_OPTION },
+        { "compress-program", required_argument, NULL,
+          COMPRESS_PROGRAM_OPTION },
+        { "random-source", required_argument, NULL, RANDOM_SOURCE_OPTION },
+        { "stable", no_argument, NULL, 's' },
+        { "batch-size", required_argument, NULL, NMERGE_OPTION },
+        { "buffer-size", required_argument, NULL, 'S' },
+        { "field-separator", required_argument, NULL, 't' },
+        { "temporary-directory", required_argument, NULL, 'T' },
+        { "unique", no_argument, NULL, 'u' },
+        { "parallel", required_argument, NULL, PARALLEL_OPTION },
 
-  {GETOPT_HELP_OPTION_DECL},
-  {GETOPT_VERSION_OPTION_DECL},
-  {NULL, 0, NULL, 0}
-};
-
+        { GETOPT_HELP_OPTION_DECL },
+        { GETOPT_VERSION_OPTION_DECL },
+        { NULL, 0, NULL, 0 } };
 
 void
-add_sort_extra_args (char* s)
+add_sort_extra_args (char *s)
 {
-  if (sort_extra_args_used == sort_extra_args_allocated )
-    sort_extra_args = x2nrealloc (sort_extra_args,
-                                  &sort_extra_args_allocated,
+  if (sort_extra_args_used == sort_extra_args_allocated)
+    sort_extra_args = x2nrealloc (sort_extra_args, &sort_extra_args_allocated,
                                   sizeof *sort_extra_args);
   sort_extra_args[sort_extra_args_used++] = xstrdup (s);
 }
@@ -146,77 +142,89 @@ Usage: %s [OPTION]... [INPUT]\n\
               program_name, program_name, program_name);
       fputs (_("\
 Converts (and optionally sorts) fields of various formats\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 With --decorate: adds the converted fields to the start\n\
 of each line and prints and prints it to STDOUT; does not sort.\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 With --undecorate: removes the first N fields from the input;\n\
 Use as post-processing step after sort(1).\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 Without --decorate and --undecorate: automatically decorates the input,\n\
 runs sort(1) and undecorates the result; This is the easiest method to use.\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 General Options:\n\
-"), stdout);
+"),
+             stdout);
 
-
-     fputs (_("\
+      fputs (_("\
       --decorate             decorate/convert the specified fields and print\n\
                              the output to STDOUT. Does not automatically run\n\
                              sort(1) or undecorates the output\n\
-"), stdout);
-     fputs (_("\
+"),
+             stdout);
+      fputs (_("\
       --header=N             does not decorate or sort the first N lines\n\
   -H                         same as --header=N\n\
-"), stdout);
+"),
+             stdout);
       fputs (_("\
   -k, --key=KEYDEF           key/field to sort; same syntax as sort(1),\n\
                              optionally followed by ':method' to convert\n\
                              to the field into a sortable value; see examples\n\
                              and available conversion below\n\
-"), stdout);
-     fputs (_("\
+"),
+             stdout);
+      fputs (_("\
   -t, --field-separator=SEP  use SEP instead of non-blank to blank transition\n\
-"), stdout);
-     fputs (_("\
+"),
+             stdout);
+      fputs (_("\
       --print-sort-args      print adjusted parameters for sort(1); Useful\n\
                              when using --decorate and then manually running\n\
                              sort(1)\n\
-"), stdout);
-     fputs (_("\
+"),
+             stdout);
+      fputs (_("\
       --undecorate=N         removes the first N fields\n\
-"), stdout);
+"),
+             stdout);
       fputs (_("\
   -z, --zero-terminated      line delimiter is NUL, not newline\n\
-"), stdout);
-     fputs (HELP_OPTION_DESCRIPTION, stdout);
-     fputs (VERSION_OPTION_DESCRIPTION, stdout);
+"),
+             stdout);
+      fputs (HELP_OPTION_DESCRIPTION, stdout);
+      fputs (VERSION_OPTION_DESCRIPTION, stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 The following options are passed to sort(1) as-is:\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
   -c, --check\n\
       --compress-program\n\
       --random-source\n\
@@ -226,68 +234,73 @@ The following options are passed to sort(1) as-is:\n\
   -T, --temporary-directory\n\
   -u, --unique\n\
       --parallel\n\
-"), stdout);
+"),
+             stdout);
 
+      putchar ('\n');
 
-     putchar ('\n');
-
-     fputs (_("\
+      fputs (_("\
 Available conversions methods (use with -k):\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     for (int i = 0 ; builtin_conversions[i].name; ++i)
-       printf ("  %-10s   %s\n", builtin_conversions[i].name,
-               builtin_conversions[i].description);
+      for (int i = 0; builtin_conversions[i].name; ++i)
+        printf ("  %-10s   %s\n", builtin_conversions[i].name,
+                builtin_conversions[i].description);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 Examples:\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 The following two invocations are equivalent:\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     printf ("   %s -k2,2:ipv4 -k3,3nr FILE.TXT\n", program_name);
+      printf ("   %s -k2,2:ipv4 -k3,3nr FILE.TXT\n", program_name);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     printf ("   %s --decorate -k2,2:ipv4 FILE.TXT | sort -k1,1 -k4,4nr \\\n \
-       | %s --undecorate 1\n", program_name, program_name);
+      printf ("   %s --decorate -k2,2:ipv4 FILE.TXT | sort -k1,1 -k4,4nr \\\n \
+       | %s --undecorate 1\n",
+              program_name, program_name);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     fputs (_("\
+      fputs (_("\
 Decorated output of roman numerals:\n\
-"), stdout);
+"),
+             stdout);
 
-     putchar ('\n');
+      putchar ('\n');
 
-     printf ("  $ printf \"%%s\\n\" C V III IX XI | "
-             "%s -k1,1:roman --decorate\n", program_name);
-     fputs ("\
+      printf ("  $ printf \"%%s\\n\" C V III IX XI | "
+              "%s -k1,1:roman --decorate\n",
+              program_name);
+      fputs ("\
   0000100 C\n\
   0000005 V\n\
   0000003 III\n\
   0000009 IX\n\
   0000011 XI\n\
-", stdout);
+",
+             stdout);
 
+      putchar ('\n');
 
-     putchar ('\n');
-
-
-     fputs (_("For detailed usage information and examples, see\n"),stdout);
-     printf ("  man %s\n", program_name);
-     fputs (_("The manual and more examples are available at\n"), stdout);
-     fputs ("  " PACKAGE_URL "\n\n", stdout);
+      fputs (_("For detailed usage information and examples, see\n"), stdout);
+      printf ("  man %s\n", program_name);
+      fputs (_("The manual and more examples are available at\n"), stdout);
+      fputs ("  " PACKAGE_URL "\n\n", stdout);
     }
   exit (status);
 }
@@ -296,10 +309,10 @@ static bool
 decorate_fields (struct linebuffer *linebuf)
 {
   bool ok = true;
-  struct line l;   /* The struct used by key-compare */
+  struct line l; /* The struct used by key-compare */
   struct line *a;
 
-  //size_t len = linebuf->length;
+  // size_t len = linebuf->length;
   struct keyfield *key = decorate_keylist;
 
   l.text = linebuf->buffer;
@@ -307,14 +320,12 @@ decorate_fields (struct linebuffer *linebuf)
   l.keybeg = NULL;
   l.keylim = NULL;
 
-
-
   l.keybeg = begfield (&l, decorate_keylist);
   l.keylim = limfield (&l, decorate_keylist);
 
   if (l.keybeg >= l.keylim)
     {
-      if (l.length>0 && l.text[l.length-1]==eol_delimiter)
+      if (l.length > 0 && l.text[l.length - 1] == eol_delimiter)
         {
           if (debug)
             dbg_printf ("chomp");
@@ -326,10 +337,8 @@ decorate_fields (struct linebuffer *linebuf)
       l.keylim = l.keybeg + l.length - (l.keybeg - l.text);
 
       if (debug)
-        dbg_printf ("keylim - keybeg = %zu", (l.keylim-l.keybeg));
+        dbg_printf ("keylim - keybeg = %zu", (l.keylim - l.keybeg));
     }
-
-
 
   a = &l;
 
@@ -351,7 +360,10 @@ decorate_fields (struct linebuffer *linebuf)
       char enda IF_LINT (= 0);
 
       /* Use the keys in-place, temporarily null-terminated.  */
-      ta = texta; tlena = lena; enda = ta[tlena]; ta[tlena] = '\0';
+      ta = texta;
+      tlena = lena;
+      enda = ta[tlena];
+      ta[tlena] = '\0';
 
       /* Process the extracted key in NUL-terminated string 'ta' */
 
@@ -362,7 +374,7 @@ decorate_fields (struct linebuffer *linebuf)
         {
           /* Innternal conversions */
           ok = ok && key->decorate_fn (ta);
-         }
+        }
       else
         {
           /* run external command */
@@ -375,7 +387,7 @@ decorate_fields (struct linebuffer *linebuf)
       ta[tlena] = enda;
 
       key = key->next;
-      if (! key)
+      if (!key)
         break;
 
       /* Find the beginning and limit of the next field.  */
@@ -405,10 +417,10 @@ decorate_file (const char *infile)
   intmax_t linenum = 0;
   struct linebuffer lb;
 
-  if (! (STREQ (infile, "-") || freopen (infile, "r", stdin)))
+  if (!(STREQ (infile, "-") || freopen (infile, "r", stdin)))
     die (SORT_FAILURE, errno, "%s", quotef (infile));
 
-  //fadvise (stdin, FADVISE_SEQUENTIAL);
+  // fadvise (stdin, FADVISE_SEQUENTIAL);
 
   initbuffer (&lb);
 
@@ -442,14 +454,14 @@ decorate_file (const char *infile)
         }
 
       if (!decorate_fields (&lb))
-        die (SORT_FAILURE, errno, _("conversion failed in line %zu"), linenum);
+        die (SORT_FAILURE, errno, _("conversion failed in line %zu"),
+             linenum);
 
       if (debug)
         dbg_printf ("writing line: '%.*s'", (int)lb.length, lb.buffer);
 
       if (fwrite (lb.buffer, 1, lb.length, stdout) != lb.length)
         die (SORT_FAILURE, errno, _("decorate: fwrite failed"));
-
     }
 
   // closefiles:
@@ -462,8 +474,6 @@ decorate_file (const char *infile)
   /* stdout is handled via the atexit-invoked close_stdout function.  */
   free (lb.buffer);
 }
-
-
 
 static void
 undecorate_file (const char *infile, int num_fields)
@@ -479,10 +489,10 @@ undecorate_file (const char *infile, int num_fields)
   key.sword = num_fields;
   key.skipsblanks = true;
 
-  if (! (STREQ (infile, "-") || freopen (infile, "r", stdin)))
+  if (!(STREQ (infile, "-") || freopen (infile, "r", stdin)))
     die (SORT_FAILURE, errno, "%s", quotef (infile));
 
-  //fadvise (stdin, FADVISE_SEQUENTIAL);
+  // fadvise (stdin, FADVISE_SEQUENTIAL);
 
   initbuffer (&lb);
 
@@ -497,17 +507,17 @@ undecorate_file (const char *infile, int num_fields)
       l.length = lb.length;
 
       /* don't print EOL character, if any */
-      if (lb.length>0 && lb.buffer[lb.length-1]==eol_delimiter)
+      if (lb.length > 0 && lb.buffer[lb.length - 1] == eol_delimiter)
         --l.length;
 
       /* skip the first N fields */
-      char* p = begfield (&l, &key);
-      size_t t = l.length - (p-l.text);
+      char *p = begfield (&l, &key);
+      size_t t = l.length - (p - l.text);
 
       if (debug)
         {
-          dbg_printf ("input Line: %zu chars: '%.*s'", l.length,
-                     (int)l.length, l.text);
+          dbg_printf ("input Line: %zu chars: '%.*s'", l.length, (int)l.length,
+                      l.text);
           dbg_printf ("undecorated Line: %zu chars: '%.*s'", t, (int)t, p);
         }
       fwrite (p, 1, t, stdout);
@@ -522,10 +532,9 @@ undecorate_file (const char *infile, int num_fields)
   free (lb.buffer);
 }
 
-
 /* this code was copied from src/sort.c */
-struct keyfield*
-parse_sort_key_arg (const char* optarg, char const** endpos)
+struct keyfield *
+parse_sort_key_arg (const char *optarg, char const **endpos)
 {
   char const *s;
   struct keyfield key_buf;
@@ -535,24 +544,24 @@ parse_sort_key_arg (const char* optarg, char const** endpos)
 
   /* Get POS1. */
   s = parse_field_count (optarg, &key->sword,
-                         N_("invalid number at field start"));
+                         N_ ("invalid number at field start"));
 
-  if (! key->sword--)
+  if (!key->sword--)
     {
       /* Provoke with 'sort -k0' */
-      badfieldspec (optarg, N_("field number is zero"));
+      badfieldspec (optarg, N_ ("field number is zero"));
     }
   if (*s == '.')
     {
       s = parse_field_count (s + 1, &key->schar,
-                             N_("invalid number after '.'"));
-      if (! key->schar--)
+                             N_ ("invalid number after '.'"));
+      if (!key->schar--)
         {
           /* Provoke with 'sort -k1.0' */
-          badfieldspec (optarg, N_("character offset is zero"));
+          badfieldspec (optarg, N_ ("character offset is zero"));
         }
     }
-  if (! (key->sword || key->schar))
+  if (!(key->sword || key->schar))
     key->sword = SIZE_MAX;
   s = set_ordering (s, key, bl_start);
   if (*s != ',')
@@ -564,24 +573,24 @@ parse_sort_key_arg (const char* optarg, char const** endpos)
     {
       /* Get POS2. */
       s = parse_field_count (s + 1, &key->eword,
-                             N_("invalid number after ','"));
-      if (! key->eword--)
+                             N_ ("invalid number after ','"));
+      if (!key->eword--)
         {
           /* Provoke with 'sort -k1,0' */
-          badfieldspec (optarg, N_("field number is zero"));
+          badfieldspec (optarg, N_ ("field number is zero"));
         }
       if (*s == '.')
         {
           s = parse_field_count (s + 1, &key->echar,
-                                 N_("invalid number after '.'"));
+                                 N_ ("invalid number after '.'"));
         }
       s = set_ordering (s, key, bl_end);
     }
 
   /* TODO: strange, sort's original code sets sword=SIZE_MAX for "-k1".
    * force override??? */
-  if (key->sword==SIZE_MAX)
-    key->sword=0;
+  if (key->sword == SIZE_MAX)
+    key->sword = 0;
 
   key = insertkey (key); /* returns a newly malloc'd struct */
 
@@ -590,9 +599,8 @@ parse_sort_key_arg (const char* optarg, char const** endpos)
   return key;
 }
 
-
 static void
-parse_external_conversion_spec (const char* optarg, const char *s,
+parse_external_conversion_spec (const char *optarg, const char *s,
                                 struct keyfield *key)
 {
   ignore_value (key);
@@ -600,14 +608,13 @@ parse_external_conversion_spec (const char* optarg, const char *s,
   ++s; /* skip the '@' */
 
   if (*s == '\0')
-    badfieldspec (optarg, N_("missing external conversion command"));
+    badfieldspec (optarg, N_ ("missing external conversion command"));
 
   die (SORT_FAILURE, 0, "external commands are not implemented (yet)");
 }
 
-
 static void
-parse_builtin_conversion_spec (const char* optarg, const char *s,
+parse_builtin_conversion_spec (const char *optarg, const char *s,
                                struct keyfield *key)
 {
   bool found = false;
@@ -615,9 +622,9 @@ parse_builtin_conversion_spec (const char* optarg, const char *s,
   ++s; /* skip the ':' */
 
   if (*s == '\0')
-    badfieldspec (optarg, N_("missing internal conversion function"));
+    badfieldspec (optarg, N_ ("missing internal conversion function"));
 
-  for (int i = 0 ; builtin_conversions[i].name; ++i)
+  for (int i = 0; builtin_conversions[i].name; ++i)
     {
       if (STREQ (s, builtin_conversions[i].name))
         {
@@ -627,22 +634,23 @@ parse_builtin_conversion_spec (const char* optarg, const char *s,
         }
     }
   if (!found)
-    badfieldspec (optarg, N_("invalid built-in conversion option"));
+    badfieldspec (optarg, N_ ("invalid built-in conversion option"));
 }
 
-void check_allowed_key_flags (const struct keyfield* key)
+void
+check_allowed_key_flags (const struct keyfield *key)
 {
   /* key->reverse is the only ordering flag allowed */
-  if (key->skipsblanks || key->skipeblanks
-      || (key->ignore != 0) || (key->translate != 0)
-      || (key->general_numeric) || (key->human_numeric)
-      || (key->month) || (key->numeric)
+  if (key->skipsblanks || key->skipeblanks || (key->ignore != 0)
+      || (key->translate != 0) || (key->general_numeric)
+      || (key->human_numeric) || (key->month) || (key->numeric)
       || (key->random) || (key->version))
-    badfieldspec (optarg, N_("ordering flags (b/d/i/h/n/g/M/R/V) can"
-                             "not be combined with a conversion function"));
+    badfieldspec (optarg, N_ ("ordering flags (b/d/i/h/n/g/M/R/V) can"
+                              "not be combined with a conversion function"));
 }
 
-void parse_key_arg (const char* optarg)
+void
+parse_key_arg (const char *optarg)
 {
   char const *s;
   struct keyfield *key = parse_sort_key_arg (optarg, &s);
@@ -668,9 +676,8 @@ void parse_key_arg (const char* optarg)
 
     default:
       /* invalid key spec character */
-      badfieldspec (optarg, N_("invalid key specification"));
+      badfieldspec (optarg, N_ ("invalid key specification"));
       break;
-
     }
 }
 
@@ -689,7 +696,6 @@ insert_decorate_key (struct keyfield *key_arg)
   key->next = NULL;
 }
 
-
 int
 adjust_key_fields ()
 {
@@ -697,72 +703,80 @@ adjust_key_fields ()
   int cnt = 0;
   int idx = 0;
 
-  do {
-    if (key->decorate_fn || key->decorate_cmd)
-      ++cnt;
-  }  while (key && ((key = key->next)));
+  do
+    {
+      if (key->decorate_fn || key->decorate_cmd)
+        ++cnt;
+    }
+  while (key && ((key = key->next)));
 
   if (debug)
     dbg_printf ("found %d decorated fields", cnt);
 
   key = keylist;
-  do {
-    if (key->decorate_fn || key->decorate_cmd)
-      {
-        /* Save the input keyfield spec */
-        insert_decorate_key (key);
+  do
+    {
+      if (key->decorate_fn || key->decorate_cmd)
+        {
+          /* Save the input keyfield spec */
+          insert_decorate_key (key);
 
-        /* when passing args to 'sort',
-           move decorated key fields to the begining */
-        key->sword = idx ; /* note: sword is ZERO based,
-                              so 0 is the first column */
-        if (key->eword != SIZE_MAX)
-          key->eword = idx;
+          /* when passing args to 'sort',
+             move decorated key fields to the begining */
+          key->sword = idx; /* note: sword is ZERO based,
+                               so 0 is the first column */
+          if (key->eword != SIZE_MAX)
+            key->eword = idx;
 
-        key->decorate_fn = NULL ;
-        key->decorate_cmd = NULL;
-        ++idx;
-      }
-    else
-      {
-        /* shift all non-decorate key fields by the count
-           of decorated fields (which will be inserted at the begining
-           of each line)*/
-        key->sword += cnt ;
-        if (key->eword != SIZE_MAX)
-          key->eword += cnt;
-      }
-  }  while (key && ((key = key->next)));
+          key->decorate_fn = NULL;
+          key->decorate_cmd = NULL;
+          ++idx;
+        }
+      else
+        {
+          /* shift all non-decorate key fields by the count
+             of decorated fields (which will be inserted at the begining
+             of each line)*/
+          key->sword += cnt;
+          if (key->eword != SIZE_MAX)
+            key->eword += cnt;
+        }
+    }
+  while (key && ((key = key->next)));
 
   return cnt;
 }
 
-char**
+char **
 build_sort_process_args ()
 {
-  int argc = 2 ; /* one 'sort' program name (argv[0]), one for NULL */
+  int argc = 2; /* one 'sort' program name (argv[0]), one for NULL */
   struct keyfield *key = keylist;
 
   /* step 1: count number of args */
-  do {
-    ++argc;
-  }  while (key && ((key = key->next)));
+  do
+    {
+      ++argc;
+    }
+  while (key && ((key = key->next)));
 
   argc += sort_extra_args_used;
 
   /* Step 2: allocate and build argv.
      The terminating NULL is implicit thanks to calloc. */
-  char** argv = xcalloc (argc, sizeof (char*));
+  char **argv = xcalloc (argc, sizeof (char *));
   int i = 0;
 
   argv[i++] = xstrdup ("sort"); /* argv[0] */
 
   key = keylist;
-  do {
-    argv[i++] = debug_keyfield (key);
-  }  while (key && ((key = key->next)));
+  do
+    {
+      argv[i++] = debug_keyfield (key);
+    }
+  while (key && ((key = key->next)));
 
-  for (size_t j=0;j<sort_extra_args_used;++j)
+  for (size_t j = 0; j < sort_extra_args_used; ++j)
     {
       argv[i++] = sort_extra_args[j];
     }
@@ -770,9 +784,8 @@ build_sort_process_args ()
   return argv;
 }
 
-
 static void
-do_decorate (int optind, int argc, char** argv)
+do_decorate (int optind, int argc, char **argv)
 {
   if (optind < argc)
     {
@@ -784,7 +797,7 @@ do_decorate (int optind, int argc, char** argv)
 }
 
 static void
-do_undecorate (int optind, int argc, char** argv, int undecorate_fields)
+do_undecorate (int optind, int argc, char **argv, int undecorate_fields)
 {
   if (optind < argc)
     {
@@ -794,7 +807,6 @@ do_undecorate (int optind, int argc, char** argv, int undecorate_fields)
   else
     undecorate_file ("-", undecorate_fields);
 }
-
 
 int
 main (int argc, char **argv)
@@ -815,10 +827,10 @@ main (int argc, char **argv)
 
   init_key_spec ();
 
-  //atexit (close_stdout);
+  // atexit (close_stdout);
 
-  while ((opt = getopt_long (argc, argv, "cCHsS:T:uk:t:z",
-                             longopts, NULL)) != -1)
+  while ((opt = getopt_long (argc, argv, "cCHsS:T:uk:t:z", longopts, NULL))
+         != -1)
     {
       switch (opt)
         {
@@ -849,7 +861,7 @@ main (int argc, char **argv)
           break;
 
         case HEADER_OPTION:
-          errno = 0 ;
+          errno = 0;
           skip_header_lines = strtol (optarg, &endp, 10);
           if (errno || (*endp != '\0'))
             die (SORT_FAILURE, 0, _("invalid number of header lines %s"),
@@ -880,7 +892,6 @@ main (int argc, char **argv)
           add_sort_extra_args ("-C");
           break;
 
-
         case COMPRESS_PROGRAM_OPTION:
           add_sort_extra_args ("--compress-program");
           add_sort_extra_args (optarg);
@@ -905,7 +916,7 @@ main (int argc, char **argv)
           /* copied as-is from src/sort.c */
           {
             char newtab = optarg[0];
-            if (! newtab)
+            if (!newtab)
               die (SORT_FAILURE, 0, _("empty tab"));
             if (optarg[1])
               {
@@ -918,7 +929,7 @@ main (int argc, char **argv)
                        that the diagnostic's wording does not need to be
                        changed once multibyte characters are supported.  */
                     die (SORT_FAILURE, 0, _("multi-character tab %s"),
-                           quote (optarg));
+                         quote (optarg));
                   }
               }
             if (tab != TAB_DEFAULT && tab != newtab)
@@ -940,7 +951,7 @@ main (int argc, char **argv)
           break;
 
         case UNDECORATE_OPTION:
-          errno = 0 ;
+          errno = 0;
           undecorate_fields = strtol (optarg, &endp, 10);
           if (errno || (*endp != '\0') || (undecorate_fields <= 0))
             die (SORT_FAILURE, 0,
@@ -956,9 +967,9 @@ main (int argc, char **argv)
           debug = true;
           break;
 
-        case_GETOPT_HELP_CHAR;
+          case_GETOPT_HELP_CHAR;
 
-        case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
+          case_GETOPT_VERSION_CHAR (PROGRAM_NAME, AUTHORS);
 
         default:
           usage (SORT_FAILURE);
@@ -992,7 +1003,7 @@ main (int argc, char **argv)
   if (print_sort_args)
     {
       /* print and exit */
-      char** sort_args = build_sort_process_args ();
+      char **sort_args = build_sort_process_args ();
       char **p = sort_args;
       while (*p)
         {
@@ -1042,21 +1053,21 @@ main (int argc, char **argv)
             die (SORT_FAILURE, errno, _("failed to fork-2"));
         }
 
-
-      if (undec_pid!=0 && sort_pid!=0)
+      if (undec_pid != 0 && sort_pid != 0)
         {
           if (debug)
             dbg_printf ("main process starting\n");
 
           /* close the read-end pipe */
-          if (close (sort_undec_fds[0])!=0)
+          if (close (sort_undec_fds[0]) != 0)
             die (SORT_FAILURE, errno,
                  _("failed to close sort-undec read-pipe"));
-          if (close (sort_undec_fds[1])!=0)
+          if (close (sort_undec_fds[1]) != 0)
             die (SORT_FAILURE, errno,
                  _("failed to close sort-undec write-pipe"));
-          if (close (dec_sort_fds[0])!=0)
-            die (SORT_FAILURE, errno, _("failed to close dec-sort read-pipe"));
+          if (close (dec_sort_fds[0]) != 0)
+            die (SORT_FAILURE, errno,
+                 _("failed to close dec-sort read-pipe"));
 
           /* If there are header lines to skip, they need to be printed
              directly to our current STDOUT, not to the sort-pipe.
@@ -1064,7 +1075,7 @@ main (int argc, char **argv)
           if (skip_header_lines)
             {
               int fd = dup (STDOUT_FILENO);
-              if (fd==-1)
+              if (fd == -1)
                 die (SORT_FAILURE, errno, _("failed to dup STDOUT fd"));
               header_out = fdopen (fd, "w");
               if (!header_out)
@@ -1073,7 +1084,8 @@ main (int argc, char **argv)
 
           /* replace the STDOUT of this process, to the write-end pipe */
           if (dup2 (dec_sort_fds[1], STDOUT_FILENO) == -1)
-            die (SORT_FAILURE, errno, _("failed to reassign dec-sort STDOUT"));
+            die (SORT_FAILURE, errno,
+                 _("failed to reassign dec-sort STDOUT"));
 
           do_decorate (optind, argc, argv);
 
@@ -1090,15 +1102,16 @@ main (int argc, char **argv)
           if (debug)
             dbg_printf ("main process: done");
         }
-      else if (sort_pid==0)
+      else if (sort_pid == 0)
         {
           /* This is the sort process */
           if (debug)
             dbg_printf ("sort process starting");
 
-          if (close (dec_sort_fds[1])!=0)
-            die (SORT_FAILURE, errno, _("failed to close dec-sort write-pipe"));
-          if (close (sort_undec_fds[0])!=0)
+          if (close (dec_sort_fds[1]) != 0)
+            die (SORT_FAILURE, errno,
+                 _("failed to close dec-sort write-pipe"));
+          if (close (sort_undec_fds[0]) != 0)
             die (SORT_FAILURE, errno,
                  _("failed to close sort-undec read-pipe"));
 
@@ -1113,7 +1126,7 @@ main (int argc, char **argv)
             die (SORT_FAILURE, errno,
                  _("failed to reassign sort-undec STDOUT"));
 
-          char** sort_args = build_sort_process_args ();
+          char **sort_args = build_sort_process_args ();
           if (debug)
             {
               char **p = sort_args;
@@ -1133,17 +1146,20 @@ main (int argc, char **argv)
           if (debug)
             dbg_printf ("undecorate child starting");
 
-          if (close (dec_sort_fds[0])!=0)
-            die (SORT_FAILURE, errno, _("failed to close dec-sort read-pipe"));
-          if (close (dec_sort_fds[1])!=0)
-            die (SORT_FAILURE, errno, _("failed to close dec-sort write-pipe"));
-          if (close (sort_undec_fds[1])!=0)
+          if (close (dec_sort_fds[0]) != 0)
+            die (SORT_FAILURE, errno,
+                 _("failed to close dec-sort read-pipe"));
+          if (close (dec_sort_fds[1]) != 0)
+            die (SORT_FAILURE, errno,
+                 _("failed to close dec-sort write-pipe"));
+          if (close (sort_undec_fds[1]) != 0)
             die (SORT_FAILURE, errno,
                  _("failed to close sort-undec write-pipe"));
 
           /* replace the STDIN of this process, to the read-end pipe */
           if (dup2 (sort_undec_fds[0], STDIN_FILENO) == -1)
-            die (SORT_FAILURE, errno, _("failed to reassign sort-undec STDIN"));
+            die (SORT_FAILURE, errno,
+                 _("failed to reassign sort-undec STDIN"));
 
           /* undecorate from STDIN */
           do_undecorate (1, 0, NULL, num_decorate_fields);

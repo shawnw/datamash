@@ -26,7 +26,7 @@
 
 enum TOKEN
 {
-  TOK_END=0,
+  TOK_END = 0,
   TOK_IDENTIFIER,
   TOK_INTEGER,
   TOK_FLOAT,
@@ -38,23 +38,19 @@ enum TOKEN
 
 extern uintmax_t scan_val_int;
 extern long double scan_val_float;
-extern char* scanner_identifier;
+extern char *scanner_identifier;
 extern bool scanner_keep_whitespace;
 
 /* Initialize the scanner from argc/argv pair.
    note: argv should contain only the actual input: remove
          any other program parameters (including progname/argv[0]) */
-void
-scanner_set_input_from_argv (int argc, const char* argv[]);
+void scanner_set_input_from_argv (int argc, const char *argv[]);
 
 /* Free any data/memory associated with the scanner */
-void
-scanner_free ();
+void scanner_free ();
 
-enum TOKEN
-scanner_get_token ();
+enum TOKEN scanner_get_token ();
 
-enum TOKEN
-scanner_peek_token ();
+enum TOKEN scanner_peek_token ();
 
 #endif

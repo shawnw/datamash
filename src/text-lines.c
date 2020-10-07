@@ -36,10 +36,10 @@
 #include "text-lines.h"
 
 void
-line_record_init (struct line_record_t* lr)
+line_record_init (struct line_record_t *lr)
 {
   initbuffer (&lr->lbuf);
-  lr->alloc_fields = 10 ;
+  lr->alloc_fields = 10;
   lr->num_fields = 0;
   lr->fields = XNMALLOC (lr->alloc_fields, struct field_record_t);
 }
@@ -74,17 +74,17 @@ line_record_debug_print_fields (const struct line_record_t *lr)
 static void
 linebuffer_nullify (struct linebuffer *line)
 {
-  assert (line->length > 0); /* LCOV_EXCL_LINE */
-  line->buffer[line->length-1] = 0; /* make it NUL terminated */
+  assert (line->length > 0);          /* LCOV_EXCL_LINE */
+  line->buffer[line->length - 1] = 0; /* make it NUL terminated */
   --line->length;
 }
 
 static inline void
-line_record_reserve_fields (struct line_record_t* lr, const size_t n)
+line_record_reserve_fields (struct line_record_t *lr, const size_t n)
 {
   if (lr->alloc_fields <= n)
     {
-      lr->alloc_fields = MAX (n,lr->alloc_fields)*2;
+      lr->alloc_fields = MAX (n, lr->alloc_fields) * 2;
       lr->fields = xnrealloc (lr->fields, lr->alloc_fields,
                               sizeof (struct field_record_t));
     }
@@ -96,16 +96,16 @@ line_record_parse_fields (struct line_record_t *lr, int field_delim)
   size_t num_fields = 0;
   size_t pos = 0;
   const size_t buflen = line_record_length (lr);
-  const char* fptr = line_record_buffer (lr);
+  const char *fptr = line_record_buffer (lr);
 
   /* Move 'fptr' to point to the beginning of 'field' */
   if (field_delim != TAB_WHITESPACE)
     {
-      while (buflen && pos<=buflen)
+      while (buflen && pos <= buflen)
         {
           /* scan buffer until next delimiter */
-          const char* field_beg = fptr;
-          while ( (pos<buflen) && (*fptr != field_delim))
+          const char *field_beg = fptr;
+          while ((pos < buflen) && (*fptr != field_delim))
             {
               ++fptr;
               ++pos;
@@ -127,19 +127,19 @@ line_record_parse_fields (struct line_record_t *lr, int field_delim)
     {
       /* delimiter is white-space transition
          (multiple whitespaces are one delimiter) */
-      while (pos<buflen)
+      while (pos < buflen)
         {
           /* Skip leading whitespace */
-          while ( (pos<buflen) && blanks[to_uchar (*fptr)])
+          while ((pos < buflen) && blanks[to_uchar (*fptr)])
             {
               ++fptr;
               ++pos;
             }
 
           /* Scan buffer until next whitespace */
-          const char* field_beg = fptr;
+          const char *field_beg = fptr;
           size_t flen = 0;
-          while ( (pos<buflen) && !blanks[to_uchar (*fptr)])
+          while ((pos < buflen) && !blanks[to_uchar (*fptr)])
             {
               ++fptr;
               ++pos;
@@ -156,36 +156,36 @@ line_record_parse_fields (struct line_record_t *lr, int field_delim)
     }
 }
 
-
 static bool
-line_record_is_comment (const struct line_record_t* lr)
+line_record_is_comment (const struct line_record_t *lr)
 {
-  const char* pch = line_record_buffer (lr);
+  const char *pch = line_record_buffer (lr);
 
   /* Skip white space at beginning of line */
   size_t s = strspn (pch, " \t");
   /* First non-whitespace character */
   char c = pch[s];
-  return (c=='#' || c==';');
+  return (c == '#' || c == ';');
 }
 
 bool
-line_record_fread (struct /* in/out */ line_record_t* lr,
-                  FILE *stream, char delimiter, bool skip_comments)
+line_record_fread (struct /* in/out */ line_record_t *lr, FILE *stream,
+                   char delimiter, bool skip_comments)
 {
-  do {
-    if (readlinebuffer_delim (&lr->lbuf, stream, delimiter) == 0)
-      return false;
-    linebuffer_nullify (&lr->lbuf);
-  } while (skip_comments && line_record_is_comment (lr));
-
+  do
+    {
+      if (readlinebuffer_delim (&lr->lbuf, stream, delimiter) == 0)
+        return false;
+      linebuffer_nullify (&lr->lbuf);
+    }
+  while (skip_comments && line_record_is_comment (lr));
 
   line_record_parse_fields (lr, in_tab);
   return true;
 }
 
 void
-line_record_free (struct line_record_t* lr)
+line_record_free (struct line_record_t *lr)
 {
   freebuffer (&lr->lbuf);
   lr->lbuf.buffer = NULL;

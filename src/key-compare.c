@@ -53,7 +53,7 @@
 #include "key-compare.h"
 
 #if HAVE_LANGINFO_CODESET
-# include <langinfo.h>
+#include <langinfo.h>
 #endif
 
 #include <inttypes.h>
@@ -78,7 +78,6 @@ bool hard_LC_COLLATE = false;
 #if HAVE_NL_LANGINFO
 bool hard_LC_TIME = 0;
 #endif
-
 
 /* FIXME: None of these tables work with multibyte character sets.
    Also, there are many other bugs when handling multibyte characters.
@@ -119,7 +118,6 @@ int tab = TAB_DEFAULT;
 /* List of key field comparisons to be tried.  */
 struct keyfield *keylist = NULL;
 
-
 /* Initialize the character class tables. */
 static void
 inittables (void)
@@ -130,9 +128,9 @@ inittables (void)
     {
       blanks[i] = field_sep (i);
 #ifdef KEY_COMPARE_NONPRINTING
-      nonprinting[i] = ! isprint (i);
+      nonprinting[i] = !isprint (i);
 #endif
-      nondictionary[i] = ! isalnum (i) && ! field_sep (i);
+      nondictionary[i] = !isalnum (i) && !field_sep (i);
       fold_toupper[i] = toupper (i);
     }
 }
@@ -140,7 +138,7 @@ inittables (void)
 /* Return a pointer to the first character of the field specified
    by KEY in LINE. */
 
-extern char * _GL_ATTRIBUTE_PURE
+extern char *_GL_ATTRIBUTE_PURE
 begfield (struct line const *line, struct keyfield const *key)
 {
   char *ptr = line->text, *lim = ptr + line->length - 1;
@@ -182,7 +180,7 @@ begfield (struct line const *line, struct keyfield const *key)
 /* Return the limit of (a pointer to the first character after) the field
    in LINE specified by KEY. */
 
-extern char * _GL_ATTRIBUTE_PURE
+extern char *_GL_ATTRIBUTE_PURE
 limfield (struct line const *line, struct keyfield const *key)
 {
   char *ptr = line->text, *lim = ptr + line->length - 1;
@@ -281,11 +279,9 @@ limfield (struct line const *line, struct keyfield const *key)
   return ptr;
 }
 
-
-
 /* Insert a malloc'd copy of key KEY_ARG at the end of the key list.  */
 
-extern struct keyfield*
+extern struct keyfield *
 insertkey (struct keyfield *key_arg)
 {
   struct keyfield **p;
@@ -302,8 +298,8 @@ insertkey (struct keyfield *key_arg)
 extern void
 badfieldspec (char const *spec, char const *msgid)
 {
-  die (SORT_FAILURE, 0, _("%s: invalid field specification %s"),
-         _(msgid), quote (spec));
+  die (SORT_FAILURE, 0, _("%s: invalid field specification %s"), _(msgid),
+       quote (spec));
   abort ();
 }
 
@@ -335,7 +331,7 @@ parse_field_count (char const *string, size_t *val, char const *msgid)
     case LONGINT_INVALID:
       if (msgid)
         die (SORT_FAILURE, 0, _("%s: invalid count at start of %s"),
-               _(msgid), quote (string));
+             _(msgid), quote (string));
       return NULL;
 
     default:
@@ -344,7 +340,6 @@ parse_field_count (char const *string, size_t *val, char const *msgid)
 
   return suffix;
 }
-
 
 /* Set the ordering options for KEY specified in S.
    Return the address of the first character in S that
@@ -382,7 +377,7 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
         case 'i':
           /* Option order should not matter, so don't let -i override
              -d.  -d implies -i, but -i does not imply -d.  */
-          if (! key->ignore)
+          if (!key->ignore)
             key->ignore = nonprinting;
           break;
 #endif
@@ -410,11 +405,11 @@ set_ordering (char const *s, struct keyfield *key, enum blanktype blanktype)
           break;
 #endif
         default:
-          return (char *) s;
+          return (char *)s;
         }
       ++s;
     }
-  return (char *) s;
+  return (char *)s;
 }
 
 /* Initialize KEY.  */
@@ -426,8 +421,6 @@ key_init (struct keyfield *key)
   key->eword = SIZE_MAX;
   return key;
 }
-
-
 
 extern void
 init_key_spec (void)
@@ -445,71 +438,70 @@ init_key_spec (void)
        point is multibyte, use the C locale's decimal point.  FIXME:
        add support for multibyte decimal points.  */
     decimal_point = to_uchar (locale->decimal_point[0]);
-    if (! decimal_point || locale->decimal_point[1])
+    if (!decimal_point || locale->decimal_point[1])
       decimal_point = '.';
 
     /* FIXME: add support for multibyte thousands separators.  */
     thousands_sep = to_uchar (*locale->thousands_sep);
-    if (! thousands_sep || locale->thousands_sep[1])
+    if (!thousands_sep || locale->thousands_sep[1])
       thousands_sep = -1;
   }
 
   inittables ();
 }
 
-
-extern char*
+extern char *
 debug_keyfield (const struct keyfield *key)
 {
-  size_t len = (INT_BUFSIZE_BOUND (uintmax_t))*4 /* up to 4 numbers */
-    + strlen ("-k,.")  /* argument syntax */
-    + strlen ("bbdfghiMnRrV") /* all possible options */
-    + ( (key->decorate_fn)?30:0 )
-    + ( (key->decorate_cmd)?strlen (key->decorate_cmd):0)
-    + 100 + 1 ; /* extra for good luck, and NULL */
+  size_t len = (INT_BUFSIZE_BOUND (uintmax_t)) * 4 /* up to 4 numbers */
+               + strlen ("-k,.")                   /* argument syntax */
+               + strlen ("bbdfghiMnRrV")           /* all possible options */
+               + ((key->decorate_fn) ? 30 : 0)
+               + ((key->decorate_cmd) ? strlen (key->decorate_cmd) : 0) + 100
+               + 1; /* extra for good luck, and NULL */
 
-  char* buf = xcalloc (len,1);
+  char *buf = xcalloc (len, 1);
   char *p = buf;
 
-  p = stpcpy (p,"-k");
-  p += sprintf (p, "%zu", key->sword+1);
+  p = stpcpy (p, "-k");
+  p += sprintf (p, "%zu", key->sword + 1);
   if (key->schar)
-    p += sprintf (p,".%zu", key->schar+1);
+    p += sprintf (p, ".%zu", key->schar + 1);
   if (key->skipsblanks)
-    p = stpcpy (p,"b");
+    p = stpcpy (p, "b");
   if (key->eword != SIZE_MAX)
     {
-      p += sprintf (p,",%zu",key->eword+1);
+      p += sprintf (p, ",%zu", key->eword + 1);
       if (key->echar)
-        p += sprintf (p,".%zu", key->echar);
+        p += sprintf (p, ".%zu", key->echar);
     }
   if (key->skipeblanks)
-    p = stpcpy (p,"b");
+    p = stpcpy (p, "b");
   if (key->ignore == nondictionary)
-    p = stpcpy (p,"d");
+    p = stpcpy (p, "d");
   if (key->translate == fold_toupper)
-    p = stpcpy (p,"f");
+    p = stpcpy (p, "f");
   if (key->general_numeric)
-    p = stpcpy (p,"g");
+    p = stpcpy (p, "g");
   if (key->human_numeric)
-    p = stpcpy (p,"h");
+    p = stpcpy (p, "h");
   if (key->ignore == nonprinting)
-    p = stpcpy (p,"i");
+    p = stpcpy (p, "i");
   if (key->month)
-    p = stpcpy (p,"M");
+    p = stpcpy (p, "M");
   if (key->numeric)
-    p = stpcpy (p,"n");
+    p = stpcpy (p, "n");
   if (key->random)
-    p = stpcpy (p,"R");
+    p = stpcpy (p, "R");
   if (key->reverse)
-    p = stpcpy (p,"r");
+    p = stpcpy (p, "r");
   if (key->version)
-    p = stpcpy (p,"V");
+    p = stpcpy (p, "V");
 
   if (key->decorate_fn)
-    p += sprintf (p,":[decorate %p]", key->decorate_fn);
+    p += sprintf (p, ":[decorate %p]", key->decorate_fn);
   if (key->decorate_cmd)
-    p += sprintf (p,"@%s", key->decorate_cmd);
+    p += sprintf (p, "@%s", key->decorate_cmd);
 
   return buf;
 }
@@ -519,10 +511,12 @@ debug_keylist (FILE *stream)
 {
   struct keyfield const *key = keylist;
 
-  do {
-    char *p = debug_keyfield (key);
-    fputs (p, stream);
-    fputc ('\n', stream);
-    free (p);
-  }  while (key && ((key = key->next)));
+  do
+    {
+      char *p = debug_keyfield (key);
+      fputs (p, stream);
+      fputc ('\n', stream);
+      free (p);
+    }
+  while (key && ((key = key->next)));
 }

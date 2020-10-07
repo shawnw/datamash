@@ -37,15 +37,16 @@ static struct datamash_ops *dm = NULL;
 struct parser_field_t
 {
   uintmax_t num;
-  bool      by_name;
-  char*     name;
-  bool      range;
-  bool      pair;
+  bool by_name;
+  char *name;
+  bool range;
+  bool pair;
 };
 
 struct parser_param_t
 {
-  enum {
+  enum
+  {
     PARAM_INT,
     PARAM_FLOAT,
     PARAM_CHAR
@@ -68,7 +69,6 @@ static struct parser_param_t *_params;
 static size_t _params_alloc;
 static size_t _params_used;
 
-
 static void
 _alloc_ops ()
 {
@@ -89,19 +89,19 @@ reset_parsed_operation ()
 {
   fop = OP_INVALID;
 
-  for (size_t i=0; i<_fields_used; ++i)
+  for (size_t i = 0; i < _fields_used; ++i)
     free (_fields[i].name);
 
   _fields_used = 0;
   _params_used = 0;
 }
 
-static struct parser_field_t*
+static struct parser_field_t *
 alloc_next_field ()
 {
   if (_fields_used == _fields_alloc)
-    _fields = x2nrealloc (_fields, &_fields_alloc,
-                          sizeof (struct parser_field_t));
+    _fields
+        = x2nrealloc (_fields, &_fields_alloc, sizeof (struct parser_field_t));
   struct parser_field_t *p = &_fields[_fields_used++];
   memset (p, 0, sizeof (*p));
   return p;
@@ -109,15 +109,14 @@ alloc_next_field ()
 
 /* Evalutates to TRUE if operation X (=enum field_operation)
    requires a paired field parameters (e.g. 1:2) */
-#define OP_NEED_PAIR_PARAMS(x) (((x)==OP_P_COVARIANCE)||\
-                                ((x)==OP_S_COVARIANCE)||\
-                                ((x)==OP_P_PEARSON_COR)||\
-                                ((x)==OP_S_PEARSON_COR))
+#define OP_NEED_PAIR_PARAMS(x)                                                \
+  (((x) == OP_P_COVARIANCE) || ((x) == OP_S_COVARIANCE)                       \
+   || ((x) == OP_P_PEARSON_COR) || ((x) == OP_S_PEARSON_COR))
 
-#define ADD_NAMED_GROUP(name)  (add_group_col (true,0,(name)))
-#define ADD_NUMERIC_GROUP(num) (add_group_col (false,num,NULL))
+#define ADD_NAMED_GROUP(name) (add_group_col (true, 0, (name)))
+#define ADD_NUMERIC_GROUP(num) (add_group_col (false, num, NULL))
 static void
-add_group_col (bool by_name, size_t num, const char* name)
+add_group_col (bool by_name, size_t num, const char *name)
 {
   if (dm->num_grps == dm->alloc_grps)
     dm->grps = x2nrealloc (dm->grps, &dm->alloc_grps, sizeof *dm->grps);
@@ -143,80 +142,81 @@ add_op (enum field_operation op, const struct parser_field_t *f)
   if (f->by_name)
     dm->header_required = true;
 
-  #ifdef _STANDALONE_
+#ifdef _STANDALONE_
   memset (p, 0, sizeof (struct fieldop));
   p->op = op;
   p->field = f->num;
   p->field_by_name = f->by_name;
   p->field_name = f->name;
-  #else
+#else
   field_op_init (p, op, f->by_name, f->num, f->name);
-  #endif
+#endif
   return p;
 }
 
 static void
 set_op_params (struct fieldop *op)
 {
-  if (op->op==OP_BIN_BUCKETS)
+  if (op->op == OP_BIN_BUCKETS)
     {
       op->params.bin_bucket_size = 100; /* default bucket size */
-      if (_params_used==1)
+      if (_params_used == 1)
         op->params.bin_bucket_size = _params[0].f;
       /* TODO: in the future, accept offset as well? */
-      if (_params_used>1)
+      if (_params_used > 1)
         die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-                                    quote (get_field_operation_name (op->op)));
+             quote (get_field_operation_name (op->op)));
       return;
     }
 
-  if (op->op==OP_STRBIN)
+  if (op->op == OP_STRBIN)
     {
       op->params.strbin_bucket_size = 10; /* default bucket size for strbin */
-      if (_params_used==1)
+      if (_params_used == 1)
         op->params.strbin_bucket_size = _params[0].u;
-      if (op->params.strbin_bucket_size==0)
+      if (op->params.strbin_bucket_size == 0)
         die (EXIT_FAILURE, 0, _("strbin bucket size must not be zero"));
       /* TODO: in the future, accept offset as well? */
-      if (_params_used>1)
+      if (_params_used > 1)
         die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-                                    quote (get_field_operation_name (op->op)));
+             quote (get_field_operation_name (op->op)));
       return;
     }
 
-  if (op->op==OP_PERCENTILE)
+  if (op->op == OP_PERCENTILE)
     {
       op->params.percentile = 95; /* default percentile */
-      if (_params_used==1)
+      if (_params_used == 1)
         op->params.percentile = _params[0].u;
-      if (op->params.percentile==0 || op->params.percentile>100)
+      if (op->params.percentile == 0 || op->params.percentile > 100)
         die (EXIT_FAILURE, 0, _("invalid percentile value %" PRIuMAX),
              (uintmax_t)op->params.percentile);
-      if (_params_used>1)
+      if (_params_used > 1)
         die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-                                    quote (get_field_operation_name (op->op)));
+             quote (get_field_operation_name (op->op)));
       return;
     }
 
-  if (op->op==OP_TRIMMED_MEAN)
+  if (op->op == OP_TRIMMED_MEAN)
     {
       op->params.trimmed_mean = 0; /* default trimmed mean = no trim */
-      if (_params_used==1)
+      if (_params_used == 1)
         op->params.trimmed_mean = _params[0].f;
-      if (op->params.trimmed_mean<0 || op->params.trimmed_mean>0.5)
-        die (EXIT_FAILURE, 0, _("invalid trim mean value %Lg " \
-				"(expected 0 <= X <= 0.5)"),
+      if (op->params.trimmed_mean < 0 || op->params.trimmed_mean > 0.5)
+        die (EXIT_FAILURE, 0,
+             _("invalid trim mean value %Lg "
+                "(expected 0 <= X <= 0.5)"),
              op->params.trimmed_mean);
-      if (_params_used>1)
+      if (_params_used > 1)
         die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-                                    quote (get_field_operation_name (op->op)));
+             quote (get_field_operation_name (op->op)));
       return;
     }
 
-  if (op->op==OP_GETNUM)
+  if (op->op == OP_GETNUM)
     {
       op->params.get_num_type = ENT_POSITIVE_DECIMAL;
-      if (_params_used==1)
+      if (_params_used == 1)
         {
           switch (_params[0].c)
             {
@@ -240,36 +240,37 @@ set_op_params (struct fieldop *op)
               break;
 
             default:
-              die (EXIT_FAILURE, 0, _("invalid getnum type '%c'"),_params[0].c);
+              die (EXIT_FAILURE, 0, _("invalid getnum type '%c'"),
+                   _params[0].c);
             }
         }
-      if (_params_used>1)
+      if (_params_used > 1)
         die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-                                    quote (get_field_operation_name (op->op)));
+             quote (get_field_operation_name (op->op)));
       return;
     }
 
   /* All other operations do not take parameters */
-  if (_params_used>0)
+  if (_params_used > 0)
     die (EXIT_FAILURE, 0, _("too many parameters for operation %s"),
-        quote (get_field_operation_name (op->op)));
+         quote (get_field_operation_name (op->op)));
 }
 
 static void
 parse_simple_operation_column (struct parser_field_t /*OUTPUT*/ *p,
                                bool in_range, bool in_pair)
 {
-  assert (p);                                    /* LCOV_EXCL_LINE */
+  assert (p); /* LCOV_EXCL_LINE */
   enum TOKEN tok = scanner_get_token ();
-  switch (tok)                                   /* LCOV_EXCL_BR */
+  switch (tok) /* LCOV_EXCL_BR */
     {
     case TOK_IDENTIFIER:
       p->by_name = true;
       p->name = xstrdup (scanner_identifier);
       break;
 
-    case TOK_WHITESPACE:                        /* LCOV_EXCL_LINE */
-      internal_error ("whitespace");            /* LCOV_EXCL_LINE */
+    case TOK_WHITESPACE:             /* LCOV_EXCL_LINE */
+      internal_error ("whitespace"); /* LCOV_EXCL_LINE */
 
     case TOK_COMMA:
       die (EXIT_FAILURE, 0, _("missing field for operation %s"),
@@ -296,7 +297,7 @@ parse_simple_operation_column (struct parser_field_t /*OUTPUT*/ *p,
 
     case TOK_INTEGER:
       /* Zero values will fall-through to the error message below */
-      if (scan_val_int>0)
+      if (scan_val_int > 0)
         {
           p->by_name = false;
           p->num = scan_val_int;
@@ -307,8 +308,7 @@ parse_simple_operation_column (struct parser_field_t /*OUTPUT*/ *p,
     case TOK_FLOAT:
     default:
       die (EXIT_FAILURE, 0, _("invalid field '%s' for operation %s"),
-          scanner_identifier,
-          quote (get_field_operation_name (fop)));
+           scanner_identifier, quote (get_field_operation_name (fop)));
     }
 }
 
@@ -341,10 +341,10 @@ parse_operation_column ()
 
       if (p->by_name || q->by_name)
         die (EXIT_FAILURE, 0, _("field range for %s must be numeric"),
-                                quote (get_field_operation_name (fop)));
+             quote (get_field_operation_name (fop)));
       if (p->num >= q->num)
         die (EXIT_FAILURE, 0, _("invalid field range for operation %s"),
-                                quote (get_field_operation_name (fop)));
+             quote (get_field_operation_name (fop)));
     }
 }
 
@@ -382,33 +382,33 @@ parse_operation_params (enum field_operation op)
 
       if (_params_used == _params_alloc)
         _params = x2nrealloc (_params, &_params_alloc,
-                                        sizeof (struct parser_param_t));
+                              sizeof (struct parser_param_t));
       struct parser_param_t *p = &_params[_params_used++];
 
       switch (tok)
         {
         case TOK_INTEGER:
           p->type = PARAM_INT;
-          p->u    = scan_val_int;
-          p->f    = scan_val_int;
+          p->u = scan_val_int;
+          p->f = scan_val_int;
           break;
 
         case TOK_FLOAT:
           p->type = PARAM_FLOAT;
-          p->f    = scan_val_float;
+          p->f = scan_val_float;
           break;
 
         case TOK_WHITESPACE:
         case TOK_END:
           die (EXIT_FAILURE, 0, _("missing parameter for operation %s"),
-                                  quote (get_field_operation_name (fop)));
+               quote (get_field_operation_name (fop)));
 
         case TOK_IDENTIFIER:
           /* Currently, only OP_GETNUM accepts non-numeric parameter */
           if (op == OP_GETNUM)
             {
               p->type = PARAM_CHAR;
-              p->c    = scanner_identifier[0];
+              p->c = scanner_identifier[0];
               break;
             }
           /* Otherwise, fall through */
@@ -419,9 +419,7 @@ parse_operation_params (enum field_operation op)
         case TOK_COLONS:
         default:
           die (EXIT_FAILURE, 0, _("invalid parameter %s for operation %s"),
-                                  scanner_identifier,
-                                  quote (get_field_operation_name (fop)));
-
+               scanner_identifier, quote (get_field_operation_name (fop)));
         }
 
       tok = scanner_peek_token ();
@@ -434,16 +432,16 @@ parse_operation_params (enum field_operation op)
 
 static inline bool
 compatible_operation_modes (enum processing_mode current,
-                             enum processing_mode added)
+                            enum processing_mode added)
 {
-  return ((current==MODE_CROSSTAB)&&(added==MODE_GROUPBY))||
-         (current==added);
+  return ((current == MODE_CROSSTAB) && (added == MODE_GROUPBY))
+         || (current == added);
 }
 
 static void
 create_field_ops ()
 {
-  for (size_t i=0; i<_fields_used; ++i)
+  for (size_t i = 0; i < _fields_used; ++i)
     {
       const struct parser_field_t *f = &_fields[i];
       struct fieldop *op = add_op (fop, f);
@@ -451,16 +449,16 @@ create_field_ops ()
 
       if (OP_NEED_PAIR_PARAMS (fop) && !f->pair)
         die (EXIT_FAILURE, 0, _("operation %s requires field pairs"),
-                                quote (get_field_operation_name (fop)));
+             quote (get_field_operation_name (fop)));
       if (!OP_NEED_PAIR_PARAMS (fop) && f->pair)
         die (EXIT_FAILURE, 0, _("operation %s cannot use pair of fields"),
-                                quote (get_field_operation_name (fop)));
+             quote (get_field_operation_name (fop)));
 
       if (f->range)
         {
-          uintmax_t to   = _fields[++i].num;
+          uintmax_t to = _fields[++i].num;
           struct parser_field_t t = *f;
-          while (t.num<to)
+          while (t.num < to)
             {
               ++t.num;
               op = add_op (fop, &t);
@@ -476,7 +474,8 @@ create_field_ops ()
           op = add_op (fop, other_f);
           set_op_params (op);
           op->master = true;
-          op->slave_idx = dm->num_ops-2; /* index of the prev op = slave op */
+          op->slave_idx
+              = dm->num_ops - 2; /* index of the prev op = slave op */
         }
     }
 }
@@ -489,23 +488,23 @@ parse_operation (enum processing_mode pm)
   scanner_get_token ();
   enum processing_mode pm2;
   fop = get_field_operation (scanner_identifier, &pm2);
-  if (fop==OP_INVALID)
+  if (fop == OP_INVALID)
     {
       pm2 = get_processing_mode (scanner_identifier);
       if (pm2 != MODE_INVALID)
-        die (EXIT_FAILURE,0, _("conflicting operation %s"),
-                               quote (scanner_identifier));
+        die (EXIT_FAILURE, 0, _("conflicting operation %s"),
+             quote (scanner_identifier));
 
-      die (EXIT_FAILURE,0, _("invalid operation %s"),
-                             quote (scanner_identifier));
+      die (EXIT_FAILURE, 0, _("invalid operation %s"),
+           quote (scanner_identifier));
     }
 
-  if (!compatible_operation_modes (pm,pm2))
-    die (EXIT_FAILURE, 0, _("conflicting operation found: "\
-           "expecting %s operations, but found %s operation %s"),
-           get_processing_mode_name (pm),
-           get_processing_mode_name (pm2),
-           quote (scanner_identifier));
+  if (!compatible_operation_modes (pm, pm2))
+    die (EXIT_FAILURE, 0,
+         _("conflicting operation found: "
+            "expecting %s operations, but found %s operation %s"),
+         get_processing_mode_name (pm), get_processing_mode_name (pm2),
+         quote (scanner_identifier));
 
   parse_operation_params (fop);
 
@@ -526,12 +525,12 @@ parse_operations (enum processing_mode pm)
 
   /* After adding all operations, see of there are master/slave ops
    * that need resolving - caching their pointer instead of index */
-  for (size_t i=0; i<dm->num_ops; ++i)
-     {
+  for (size_t i = 0; i < dm->num_ops; ++i)
+    {
       if (!dm->ops[i].master)
         continue;
       const size_t si = dm->ops[i].slave_idx;
-      assert (si<=dm->num_ops);                  /* LCOV_EXCL_LINE */
+      assert (si <= dm->num_ops); /* LCOV_EXCL_LINE */
       dm->ops[i].slave_op = &dm->ops[si];
     }
 }
@@ -540,14 +539,14 @@ static void
 parse_mode_column (enum processing_mode pm)
 {
   enum TOKEN tok = scanner_get_token ();
-  switch (tok)                                   /* LCOV_EXCL_BR */
+  switch (tok) /* LCOV_EXCL_BR */
     {
     case TOK_IDENTIFIER:
       ADD_NAMED_GROUP (scanner_identifier);
       break;
 
-    case TOK_WHITESPACE:                        /* LCOV_EXCL_LINE */
-      internal_error ("whitespace");            /* LCOV_EXCL_LINE */
+    case TOK_WHITESPACE:             /* LCOV_EXCL_LINE */
+      internal_error ("whitespace"); /* LCOV_EXCL_LINE */
 
     case TOK_COMMA:
     case TOK_END:
@@ -555,7 +554,7 @@ parse_mode_column (enum processing_mode pm)
            quote (get_processing_mode_name (pm)));
 
     case TOK_INTEGER:
-      if (scan_val_int>0)
+      if (scan_val_int > 0)
         {
           ADD_NUMERIC_GROUP (scan_val_int);
           break;
@@ -567,9 +566,7 @@ parse_mode_column (enum processing_mode pm)
     case TOK_FLOAT:
     default:
       die (EXIT_FAILURE, 0, _("invalid field '%s' for operation %s"),
-          scanner_identifier,
-          quote (get_processing_mode_name (pm)));
-
+           scanner_identifier, quote (get_processing_mode_name (pm)));
     }
 }
 
@@ -589,23 +586,24 @@ parse_mode_column_list (enum processing_mode pm)
      field specification for groups can't handle dashes or colons (for now) */
   if (tok == TOK_DASH)
     die (EXIT_FAILURE, 0, _("invalid field range for operation %s"),
-                            quote (get_processing_mode_name (pm)));
+         quote (get_processing_mode_name (pm)));
   if (tok == TOK_COLONS)
     die (EXIT_FAILURE, 0, _("invalid field pair for operation %s"),
-                            quote (get_processing_mode_name (pm)));
+         quote (get_processing_mode_name (pm)));
 }
 
 static bool
-parse_check_line_or_field (const char* s)
+parse_check_line_or_field (const char *s)
 {
-  if (STREQ (s,"lines") || STREQ (s,"line") \
-      || STREQ (s,"rows") || STREQ (s,"row"))
+  if (STREQ (s, "lines") || STREQ (s, "line") || STREQ (s, "rows")
+      || STREQ (s, "row"))
     return true;
-  if (STREQ (s,"fields") || STREQ (s,"field") \
-      || STREQ (s,"columns") || STREQ (s,"column") || STREQ (s,"col"))
+  if (STREQ (s, "fields") || STREQ (s, "field") || STREQ (s, "columns")
+      || STREQ (s, "column") || STREQ (s, "col"))
     return false;
 
-  die (EXIT_FAILURE, 0, _("invalid option %s for operation check"), quote (s));
+  die (EXIT_FAILURE, 0, _("invalid option %s for operation check"),
+       quote (s));
 }
 
 static void
@@ -633,27 +631,31 @@ parse_mode_check ()
           set_lines = parse_check_line_or_field (scanner_identifier);
           tok = scanner_get_token ();
           if (tok != TOK_INTEGER)
-            die (EXIT_FAILURE, 0, _("number expected after option in " \
-                                    "operation 'check'"));
+            die (EXIT_FAILURE, 0,
+                 _("number expected after option in "
+                    "operation 'check'"));
           value = scan_val_int;
         }
 
       if (value == 0)
-        die (EXIT_FAILURE, 0, _("invalid value zero for lines/fields in "  \
-                                "operation 'check'"));
+        die (EXIT_FAILURE, 0,
+             _("invalid value zero for lines/fields in "
+                "operation 'check'"));
 
       if (set_lines)
         {
-          if (n_lines>0)
-            die (EXIT_FAILURE, 0, _("number of lines/rows already set in " \
-                                    "operation 'check'"));
+          if (n_lines > 0)
+            die (EXIT_FAILURE, 0,
+                 _("number of lines/rows already set in "
+                    "operation 'check'"));
           n_lines = value;
         }
       else
         {
-          if (n_fields>0)
-            die (EXIT_FAILURE, 0, _("number of fields/columns already set in " \
-                                    "operation 'check'"));
+          if (n_fields > 0)
+            die (EXIT_FAILURE, 0,
+                 _("number of fields/columns already set in "
+                    "operation 'check'"));
           n_fields = value;
         }
 
@@ -671,90 +673,94 @@ parse_mode ()
   enum processing_mode pm = get_processing_mode (scanner_identifier);
   dm->mode = pm;
 
-  switch (pm)                                    /* LCOV_EXCL_BR_LINE */
-  {
-  case MODE_TRANSPOSE:
-  case MODE_NOOP:
-  case MODE_REVERSE:
-    break;
+  switch (pm) /* LCOV_EXCL_BR_LINE */
+    {
+    case MODE_TRANSPOSE:
+    case MODE_NOOP:
+    case MODE_REVERSE:
+      break;
 
-  case MODE_TABULAR_CHECK:
-    parse_mode_check ();
-    break;
+    case MODE_TABULAR_CHECK:
+      parse_mode_check ();
+      break;
 
-  case MODE_REMOVE_DUPS:
-    parse_mode_column_list (pm);
-    break;
+    case MODE_REMOVE_DUPS:
+      parse_mode_column_list (pm);
+      break;
 
-  case MODE_CROSSTAB:
-    parse_mode_column_list (pm);
-    if (dm->num_grps!=2)
-      die (EXIT_FAILURE,0, _("crosstab requires exactly 2 fields, " \
-                               "found %"PRIuMAX), (uintmax_t)dm->num_grps);
+    case MODE_CROSSTAB:
+      parse_mode_column_list (pm);
+      if (dm->num_grps != 2)
+        die (EXIT_FAILURE, 0,
+             _("crosstab requires exactly 2 fields, "
+                "found %" PRIuMAX),
+             (uintmax_t)dm->num_grps);
 
-    /* if the user didn't specify an operation, print counts */
-    parse_operations (pm);
-    if (dm->num_ops==0)
-      {
-        const uintmax_t grp_col = dm->grps[0].num;
-        struct parser_field_t dummy = {grp_col,false,NULL,false,false};
-        add_op (OP_COUNT, &dummy);
-      }
-    else if (dm->num_ops>1)
-      {
-        die (EXIT_FAILURE,0, _("crosstab supports one operation, " \
-                                 "found %"PRIuMAX), (uintmax_t)dm->num_ops);
-      }
-    break;
+      /* if the user didn't specify an operation, print counts */
+      parse_operations (pm);
+      if (dm->num_ops == 0)
+        {
+          const uintmax_t grp_col = dm->grps[0].num;
+          struct parser_field_t dummy = { grp_col, false, NULL, false, false };
+          add_op (OP_COUNT, &dummy);
+        }
+      else if (dm->num_ops > 1)
+        {
+          die (EXIT_FAILURE, 0,
+               _("crosstab supports one operation, "
+                  "found %" PRIuMAX),
+               (uintmax_t)dm->num_ops);
+        }
+      break;
 
-  case MODE_GROUPBY:
-    parse_mode_column_list (pm);
-    parse_operations (pm);
-    if (dm->num_ops==0)
-      die (EXIT_FAILURE,0, _("missing operation"));
-    break;
+    case MODE_GROUPBY:
+      parse_mode_column_list (pm);
+      parse_operations (pm);
+      if (dm->num_ops == 0)
+        die (EXIT_FAILURE, 0, _("missing operation"));
+      break;
 
-  case MODE_PER_LINE:                           /* LCOV_EXCL_LINE */
-    internal_error ("line mode used directly"); /* LCOV_EXCL_LINE */
-    break;
+    case MODE_PER_LINE:                           /* LCOV_EXCL_LINE */
+      internal_error ("line mode used directly"); /* LCOV_EXCL_LINE */
+      break;
 
-  case MODE_INVALID:                 /* LCOV_EXCL_LINE */
-  default:                           /* LCOV_EXCL_LINE */
-    internal_error ("wrong opmode"); /* LCOV_EXCL_LINE */
-    break;
-  }
+    case MODE_INVALID:                 /* LCOV_EXCL_LINE */
+    default:                           /* LCOV_EXCL_LINE */
+      internal_error ("wrong opmode"); /* LCOV_EXCL_LINE */
+      break;
+    }
 
-  if (scanner_peek_token ()!=TOK_END)
-    die (EXIT_FAILURE,0,_("extra operand %s"), quote (scanner_identifier));
+  if (scanner_peek_token () != TOK_END)
+    die (EXIT_FAILURE, 0, _("extra operand %s"), quote (scanner_identifier));
 }
 
 static void
 parse_mode_or_op ()
 {
   enum TOKEN tok = scanner_peek_token ();
-  assert ( tok != TOK_END );                      /* LCOV_EXCL_LINE */
+  assert (tok != TOK_END); /* LCOV_EXCL_LINE */
 
   enum processing_mode pm = get_processing_mode (scanner_identifier);
   if (pm != MODE_INVALID)
     {
       parse_mode ();
-      return ;
+      return;
     }
 
   enum field_operation fop = get_field_operation (scanner_identifier, &pm);
-  if (fop!=OP_INVALID)
+  if (fop != OP_INVALID)
     {
       dm->mode = pm;
       parse_operations (pm);
-      return ;
+      return;
     }
 
-  die (EXIT_FAILURE,0, _("invalid operation %s"),
-		  quote (scanner_identifier));
+  die (EXIT_FAILURE, 0, _("invalid operation %s"),
+       quote (scanner_identifier));
 }
 
-struct datamash_ops*
-datamash_ops_parse ( int argc, const char* argv[] )
+struct datamash_ops *
+datamash_ops_parse (int argc, const char *argv[])
 {
   _alloc_ops ();
   scanner_set_input_from_argv (argc, argv);
@@ -763,14 +769,13 @@ datamash_ops_parse ( int argc, const char* argv[] )
   return dm;
 }
 
-struct datamash_ops*
-datamash_ops_parse_premode ( enum processing_mode pm,
-                             const char* grouping,
-                             int argc, const char* argv[] )
+struct datamash_ops *
+datamash_ops_parse_premode (enum processing_mode pm, const char *grouping,
+                            int argc, const char *argv[])
 {
   _alloc_ops ();
-  assert (argc > 0);                             /* LCOV_EXCL_LINE */
-  assert (pm == MODE_GROUPBY);                   /* LCOV_EXCL_LINE */
+  assert (argc > 0);           /* LCOV_EXCL_LINE */
+  assert (pm == MODE_GROUPBY); /* LCOV_EXCL_LINE */
   dm->mode = pm;
   scanner_set_input_from_argv (1, &grouping);
   parse_mode_column_list (pm);
@@ -782,18 +787,18 @@ datamash_ops_parse_premode ( enum processing_mode pm,
 }
 
 void
-datamash_ops_free ( struct datamash_ops* p )
+datamash_ops_free (struct datamash_ops *p)
 {
-  assert (p != NULL);                            /* LCOV_EXCL_LINE */
-  for (size_t i=0; i<p->num_grps; ++i)
+  assert (p != NULL); /* LCOV_EXCL_LINE */
+  for (size_t i = 0; i < p->num_grps; ++i)
     free (p->grps[i].name);
   free (p->grps);
   p->grps = NULL;
 
-  #ifndef _STANDALONE_
-  for (size_t i=0; i<p->num_ops; ++i)
+#ifndef _STANDALONE_
+  for (size_t i = 0; i < p->num_ops; ++i)
     field_op_free (&p->ops[i]);
-  #endif
+#endif
 
   free (p->ops);
   p->ops = NULL;
@@ -824,48 +829,49 @@ datamash_ops_free ( struct datamash_ops* p )
 */
 
 void
-datamash_ops_debug_print ( const struct datamash_ops* p )
+datamash_ops_debug_print (const struct datamash_ops *p)
 {
-  assert (p != NULL );
+  assert (p != NULL);
   printf ("datamash_ops =\n processing_mode = %s\n header_required = %d\n",
           get_processing_mode_name (p->mode), (int)p->header_required);
 
-  if (p->num_grps==0)
-      puts ("   no grouping specified");
-  for (size_t i=0; i<p->num_grps; ++i)
+  if (p->num_grps == 0)
+    puts ("   no grouping specified");
+  for (size_t i = 0; i < p->num_grps; ++i)
     {
       const struct group_column_t *tmp = &p->grps[i];
       if (tmp->by_name)
-        printf ("  group-by named column '%s'\n",tmp->name);
+        printf ("  group-by named column '%s'\n", tmp->name);
       else
-        printf ("  group-by numeric column %zu\n",tmp->num);
+        printf ("  group-by numeric column %zu\n", tmp->num);
     }
 
-  for (size_t i=0; i<p->num_ops; ++i)
+  for (size_t i = 0; i < p->num_ops; ++i)
     {
       struct fieldop *o = &p->ops[i];
       if (o->field_by_name)
         printf ("  operation '%s' on named column '%s'",
-                        get_field_operation_name (o->op), o->field_name);
+                get_field_operation_name (o->op), o->field_name);
       else
         printf ("  operation '%s' on numeric column %zu",
-                        get_field_operation_name (o->op), o->field);
+                get_field_operation_name (o->op), o->field);
       if (o->master)
         printf (" (master)");
       if (o->slave)
         printf (" (slave)");
-      printf ( "\n");
+      printf ("\n");
     }
 }
 
 #define TESTMAIN main
-int TESTMAIN (int argc, const char* argv[])
+int
+TESTMAIN (int argc, const char *argv[])
 {
-  if (argc<2)
+  if (argc < 2)
     die (EXIT_FAILURE, 0, _("missing script (among arguments)"));
 
-  struct datamash_ops *o = datamash_ops_parse (argc-1, argv+1);
-  datamash_ops_debug_print ( o );
+  struct datamash_ops *o = datamash_ops_parse (argc - 1, argv + 1);
+  datamash_ops_debug_print (o);
   datamash_ops_free (o);
   return 0;
 }
