@@ -34,6 +34,10 @@ AC_PROG_CC
 AC_PROG_CC_STDC
 AM_PROG_CC_C_O
 AC_PROG_CPP
+# Try to find the highest available version of clang-format for make indent
+AC_CHECK_PROGS(CLANG_FORMAT, [clang-format-10 clang-format-9 clang-format-8 \
+                             clang-format-7 clang-format-6 clang-format-5 \
+                             clang-format])
 
 # Since we use gnulib: gl_EARLY must be called as soon as possible after
 # the C compiler is checked.  The others could be later, but we just

@@ -329,3 +329,9 @@ check-expensive:
 	$(MAKE) check RUN_EXPENSIVE_TESTS=yes
 check-very-expensive:
 	$(MAKE) check-expensive RUN_VERY_EXPENSIVE_TESTS=yes
+
+.PHONY: format
+format:
+	$(CLANG_FORMAT) -i $(datamash_SOURCES) $(decorate_SOURCES)
+	$(PERL) -pi -e 's/(?<=[ (]_) \(/(/g' $(datamash_SOURCES) \
+		$(decorate_SOURCES)
